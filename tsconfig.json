@@ -2,26 +2,32 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
+
     "target": "ES2023",
+
+    "declaration": true,
     "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": ".", // 유지 가능, deprecated 경고는 무시 가능
-    "paths": {
-      "src/*": ["src/*"]
-    },
-    "ignoreDeprecations": "6.0",
+    "removeComments": true,
     "incremental": true,
+
+    "outDir": "./dist",
+
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    "isolatedModules": true,
     "skipLibCheck": true,
+
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
+
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
