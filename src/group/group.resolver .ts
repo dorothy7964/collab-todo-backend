@@ -1,10 +1,12 @@
 import { Query, Resolver } from '@nestjs/graphql';
+import { Group } from './entities/group.entity';
+import { GroupService } from './group.service';
 
-@Resolver()
+@Resolver(() => Group)
 export class GroupResolver {
-  @Query(() => Boolean) // GraphQL을 위함 Boolean은 필수
-  isTest(): boolean {
-    // 타입스크립트를 위함 : Boolean은 옵션
-    return true;
+  constructor(private readonly groupService: GroupService) {}
+  @Query(() => [Group])
+  group(): Promise<Group[]> {
+    return this.groupService.getAll();
   }
 }
