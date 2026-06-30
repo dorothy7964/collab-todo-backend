@@ -1,14 +1,11 @@
+import { CoreEntity } from '@/common/entities/core.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @ObjectType()
 @Entity()
-export class Group {
-  @PrimaryGeneratedColumn()
-  @Field(() => Number)
-  id: number;
-
-  @Field(() => String)
+export class Group extends CoreEntity {
+  @Field()
   @Column()
   name: string;
 }

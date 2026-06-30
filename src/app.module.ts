@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { Group } from './group/entities/group.entity';
 import { GroupModule } from './group/group.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { GroupModule } from './group/group.module';
       autoSchemaFile: true, // 파일을 직접 갖을 필요 없어서 변경
     }),
     GroupModule,
+    CommonModule,
   ],
 })
 export class AppModule {}
