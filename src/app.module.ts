@@ -7,6 +7,8 @@ import * as Joi from 'joi';
 import { Group } from './group/entities/group.entity';
 import { GroupModule } from './group/group.module';
 import { CommonModule } from './common/common.module';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
 
 @Module({
   imports: [
@@ -32,7 +34,7 @@ import { CommonModule } from './common/common.module';
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [Group],
+      entities: [User, Group],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -40,6 +42,7 @@ import { CommonModule } from './common/common.module';
     }),
     GroupModule,
     CommonModule,
+    UserModule,
   ],
 })
 export class AppModule {}
