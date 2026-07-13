@@ -26,7 +26,7 @@ import { CommonModule } from './common/common.module';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT!),
+      port: +process.env.DB_PORT, // port는 number 값이어야 한다. + 붙여주기
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
