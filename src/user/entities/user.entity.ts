@@ -1,5 +1,10 @@
 import { CoreEntity } from '@/common/entities/core.entity';
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { Column, Entity } from 'typeorm';
 import { IsEnum, IsString } from 'class-validator';
 
@@ -17,8 +22,9 @@ registerEnumType(UserRole, {
   },
 });
 
-@Entity()
+@InputType('UserInputType', { isAbstract: true })
 @ObjectType()
+@Entity()
 export class User extends CoreEntity {
   @Column({ unique: true })
   @Field(() => String)
