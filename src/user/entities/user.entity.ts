@@ -63,4 +63,14 @@ export class User extends CoreEntity {
       throw new InternalServerErrorException(); // throw 한 건 service파일 내부에서 catch 할 것이다.
     }
   }
+
+  async checkPassword(aPassword: string): Promise<boolean> {
+    try {
+      const ok = await bcrypt.compare(aPassword, this.password);
+      return ok;
+    } catch (e) {
+      console.log('📢 [user.entity.ts][checkPassword]', e);
+      throw new InternalServerErrorException();
+    }
+  }
 }
