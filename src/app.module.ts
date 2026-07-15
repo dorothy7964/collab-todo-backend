@@ -9,6 +9,7 @@ import { GroupModule } from './group/group.module';
 import { CommonModule } from './common/common.module';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
 
 @Module({
   imports: [
@@ -43,6 +44,9 @@ import { User } from './user/entities/user.entity';
     GroupModule,
     CommonModule,
     UserModule,
+    JwtModule.forRoot({
+      privateKey: process.env.PRIVATE_KEY,
+    }),
   ],
 })
 export class AppModule {}
