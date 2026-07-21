@@ -68,4 +68,8 @@ export class UserService {
       return { ok: false, error: '로그인에 실패했습니다.' };
     }
   }
+
+  async findById(id: number): Promise<User> {
+    return this.user.findOne({ where: { id } });
+  }
 }

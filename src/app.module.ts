@@ -1,15 +1,21 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
+import { CommonModule } from './common/common.module';
 import { Group } from './group/entities/group.entity';
 import { GroupModule } from './group/group.module';
-import { CommonModule } from './common/common.module';
-import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
+import { User } from './user/entities/user.entity';
+import { UserModule } from './user/user.module';
+import { JwtMiddleware } from './jwt/jwt.middleware';
 
 @Module({
   imports: [
@@ -40,6 +46,9 @@ import { JwtModule } from './jwt/jwt.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true, // 파일을 직접 갖을 필요 없어서 변경
+      context: ({ req }: { req: Record<string, unknown> }) => ({
+        user: req['user'],
+      }),
     }),
     GroupModule,
     CommonModule,
@@ -49,4 +58,11 @@ import { JwtModule } from './jwt/jwt.module';
     }),
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(JwtMiddleware).forRoutes({
+      path: '/graphql',
+      method: RequestMethod.POST,
+    });
+  }
+}

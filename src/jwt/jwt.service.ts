@@ -12,4 +12,9 @@ export class JwtService {
   sign(userId: number): string {
     return jwt.sign({ id: userId }, this.options.privateKey);
   }
+
+  // 올바른 토큰인지 확인
+  verify(token: string) {
+    return jwt.verify(token, this.options.privateKey);
+  }
 }
