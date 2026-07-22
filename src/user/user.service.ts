@@ -70,10 +70,10 @@ export class UserService {
     }
   }
 
-  async findById(id: number): Promise<UserProfileOutput> {
+  async findById(userId: number): Promise<UserProfileOutput> {
     //  JwtMiddleware에서도 findById 함수 사용중 (토큰 해독 후 유저 찾을 때)
     try {
-      const user = await this.user.findOneOrFail({ where: { id } });
+      const user = await this.user.findOneOrFail({ where: { id: userId } });
       return {
         ok: true,
         user,
