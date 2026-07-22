@@ -20,12 +20,13 @@
 
 ### 👤 내 정보 조회 (`me`)
 
-- ⬜ 로그인 사용자 정보 조회
-- ⬜ AuthGuard 적용
+- ✅ 로그인 사용자 정보 조회
+- ✅ AuthGuard 적용
 
 ### 🔍 사용자 정보 조회 (`userProfile`)
 
 - ✅ 사용자 조회
+- ✅ AuthGuard 적용
 - ⬜ 예외 처리
 
 ### 🔎 사용자 검색 (`searchUsers`)

@@ -1,10 +1,11 @@
+import { JwtService } from '@/jwt/jwt.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
-import { JwtService } from '@/jwt/jwt.service';
+import { UserProfileOutput } from './dtos/user-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -69,7 +70,17 @@ export class UserService {
     }
   }
 
-  async findById(id: number): Promise<User> {
-    return this.user.findOne({ where: { id } });
+  async findById(id: number): Promise<UserProfileOutput> {
+    //  JwtMiddleware에서도 findById 함수 사용중 (토큰 해독 후 유저 찾을 때)
+    try {
+      const user = await this.user.findOneOrFail({ where: { id } });
+      return {
+        ok: true,
+        user,
+      };
+    } catch (e) {
+      console.log('📢 [user.service.ts][findById]', e);
+      return { ok: false, error: '사용자를 찾을 수 없습니다.' };
+    }
   }
 }

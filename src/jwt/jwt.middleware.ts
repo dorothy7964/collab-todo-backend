@@ -24,7 +24,7 @@ export class JwtMiddleware implements NestMiddleware {
           Object.hasOwn(decoded, 'id')
         ) {
           // 3. 유저 찾기 / 반환한 payload를 이용해서 유저를 찾는다.
-          const user = await this.userService.findById(decoded['id']);
+          const { user } = await this.userService.findById(decoded['id']);
 
           // 4.  graphQL로 request를 공유 / 유저를 찾았다면 찾은 유저의 정보를 req에 다시 넣어 다음 미들웨어에 전달한다.
           req['user'] = user;
