@@ -6,6 +6,7 @@ import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { UserProfileOutput } from './dtos/user-profile.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 
 @Injectable()
 export class UserService {
@@ -67,6 +68,43 @@ export class UserService {
     } catch (e) {
       console.log('📢 [user.service.ts][login]', e);
       return { ok: false, error: '로그인에 실패했습니다.' };
+    }
+  }
+
+  async editProfile(
+    userId: number,
+    { nickname, password, profileImage }: EditProfileInput,
+  ): Promise<EditProfileOutput> {
+    try {
+      const user = await this.user.findOne({ where: { id: userId } });
+
+      if (nickname) {
+        const existingNickname = await this.user.findOne({
+          where: { nickname },
+        });
+
+        if (existingNickname && existingNickname.id !== userId) {
+          return {
+            ok: false,
+            error: '사용 중인 닉네임입니다.',
+          };
+        }
+
+        user.nickname = nickname;
+      }
+
+      if (password) {
+        user.password = password;
+      }
+
+      if (profileImage) user.profileImage = profileImage;
+
+      await this.user.save(user);
+
+      return { ok: true };
+    } catch (e) {
+      console.log('📢 [user.service.ts][editProfile]', e);
+      return { ok: false, error: '프로필을 수정할 수 없습니다.' };
     }
   }
 
