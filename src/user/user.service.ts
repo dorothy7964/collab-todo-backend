@@ -15,7 +15,13 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async createAccount({ email, nickname, password, role }: CreateAccountInput) {
+  async createAccount({
+    email,
+    nickname,
+    profileImage,
+    password,
+    role,
+  }: CreateAccountInput) {
     try {
       const emailExists = await this.user.findOne({ where: { email } });
       const nicknameExists = await this.user.findOne({ where: { nickname } });
@@ -34,7 +40,7 @@ export class UserService {
         };
       }
       await this.user.save(
-        this.user.create({ email, nickname, password, role }),
+        this.user.create({ email, nickname, profileImage, password, role }),
       );
 
       return { ok: true };

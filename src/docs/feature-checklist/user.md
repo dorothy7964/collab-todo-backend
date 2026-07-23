@@ -8,7 +8,11 @@
 
 - ✅ 이메일 중복 검사
 - ✅ 비밀번호 암호화(bcrypt)
-- ⬜ 기본 프로필 이미지 적용
+- ✅ 기본 프로필 이미지 적용
+  - [Entity] 기본 이미지가 저장되므로 profileImage를 필수(String)로 유지\_user.entity.ts
+  - [DTO] 회원가입 시 이미지를 선택적으로 받을 수 있도록 nullable: true로 처리\_create-account.dto.ts
+  - 목적: 이미지를 보내지 않으면 DB의 기본 프로필 이미지가 자동 저장되도록 구현
+
 - ⏸️ 이메일 인증 코드 생성
 - ⏸️ 인증 메일 발송
 
