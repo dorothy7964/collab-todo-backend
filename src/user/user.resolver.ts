@@ -10,6 +10,7 @@ import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { Role } from '@/auth/role.decorator';
+import { UserLookupInput, UserLookupOutput } from './dtos/user-search.dto';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -27,6 +28,14 @@ export class UserResolver {
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
     return this.userService.findById(userProfileInput.userId);
+  }
+
+  @Query(() => UserLookupOutput)
+  @Role(['Any'])
+  userLookup(
+    @Args() userLookupInput: UserLookupInput,
+  ): Promise<UserLookupOutput> {
+    return this.userService.findUser(userLookupInput.userEmail);
   }
 
   @Mutation(() => CreateAccountOutput)

@@ -7,6 +7,7 @@ import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import { UserProfileOutput } from './dtos/user-profile.dto';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
+import { UserLookupOutput } from './dtos/user-search.dto';
 
 @Injectable()
 export class UserService {
@@ -124,6 +125,29 @@ export class UserService {
       };
     } catch (e) {
       console.log('📢 [user.service.ts][findById]', e);
+      return { ok: false, error: '사용자를 찾을 수 없습니다.' };
+    }
+  }
+
+  async findUser(userEmail: string): Promise<UserLookupOutput> {
+    try {
+      const user = await this.user.findOne({
+        where: { email: userEmail },
+      });
+
+      if (!user) {
+        return {
+          ok: false,
+          error: '사용자를 찾을 수 없습니다.',
+        };
+      }
+
+      return {
+        ok: true,
+        user,
+      };
+    } catch (e) {
+      console.log('📢 [user.service.ts][findByEmail]', e);
       return { ok: false, error: '사용자를 찾을 수 없습니다.' };
     }
   }
