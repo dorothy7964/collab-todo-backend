@@ -1,4 +1,5 @@
 import { CoreEntity } from '@/common/entities/core.entity';
+import { Group } from '@/group/entities/group.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import {
   Field,
@@ -8,7 +9,7 @@ import {
 } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { IsEnum, IsString } from 'class-validator';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -52,6 +53,11 @@ export class User extends CoreEntity {
   @Field(() => String)
   @IsString()
   profileImage: string;
+
+  @OneToMany(() => Group, (group) => group.owner)
+  // User는 여러 개의 Group을 소유할 수 있다.
+  // 각 Group은 한 명의 소유자(Owner)를 가진다.
+  ownedGroups: Group[];
 
   @BeforeInsert()
   @BeforeUpdate()
