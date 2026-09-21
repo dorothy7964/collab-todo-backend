@@ -46,7 +46,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      graphiql: true, // GraphQL Playground 유지보수 종료로 GraphiQL 사용
+      // graphiql: true, // GraphQL Playground 유지보수 종료로 GraphiQL 사용
       autoSchemaFile: true, // 파일을 직접 갖을 필요 없어서 변경
       context: ({ req }: { req: Record<string, unknown> }) => ({
         user: req['user'],

@@ -13,6 +13,11 @@ export class Group extends CoreEntity {
   @IsString()
   name: string;
 
+  @Column({ nullable: true })
+  @Field(() => String, { nullable: true })
+  @IsString()
+  description?: string;
+
   @Column({ default: '/images/default-groupImage.png' })
   @Field(() => String)
   @IsString()
