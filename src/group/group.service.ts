@@ -4,6 +4,7 @@ import { Group } from './entities/group.entity';
 import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
 import { User } from '@/user/entities/user.entity';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
+import { GroupInput, GroupOutput } from './dtos/group.dto';
 
 export class GroupService {
   constructor(
@@ -12,6 +13,30 @@ export class GroupService {
   ) {}
   getAll(): Promise<Group[]> {
     return this.group.find();
+  }
+
+  // 그룹 상세 조회
+  async findGroupById({ groupId }: GroupInput): Promise<GroupOutput> {
+    try {
+      const group = await this.group.findOne({
+        where: { id: groupId },
+      });
+      if (!group) {
+        return {
+          ok: false,
+          error: '그룹 정보를 찾을 수 없습니다.',
+        };
+      }
+      return {
+        ok: true,
+        group,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹 정보를 찾을 수 없습니다.',
+      };
+    }
   }
 
   // 그룹 목록 조회

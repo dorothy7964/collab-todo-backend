@@ -5,20 +5,30 @@ import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
 import { GroupService } from './group.service';
+import { GroupInput, GroupOutput } from './dtos/group.dto';
 
 @Resolver(() => Group)
 export class GroupResolver {
   constructor(private readonly groupService: GroupService) {}
+  // 그룹 전체 보기
   @Query(() => [Group])
-  group(): Promise<Group[]> {
+  groups(): Promise<Group[]> {
     return this.groupService.getAll();
   }
 
+  // 특정 그룹 보기
+  @Query(() => GroupOutput)
+  group(@Args('input') groupInput: GroupInput): Promise<GroupOutput> {
+    return this.groupService.findGroupById(groupInput);
+  }
+
+  // 내가 속한 그룹 보기
   @Query(() => MyGroupsOutput)
   myGroups(@AuthUser() owner: User): Promise<MyGroupsOutput> {
     return this.groupService.getMyGroups(owner);
   }
 
+  // 그룹 생성
   @Mutation(() => CreateGroupOutput)
   async createGroup(
     @AuthUser() authUser: User,
