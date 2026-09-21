@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { Group } from './entities/group.entity';
 import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
 import { User } from '@/user/entities/user.entity';
+import { MyGroupsOutput } from './dtos/my-groups.dto';
 
 export class GroupService {
   constructor(
@@ -11,6 +12,24 @@ export class GroupService {
   ) {}
   getAll(): Promise<Group[]> {
     return this.group.find();
+  }
+
+  // 그룹 목록 조회
+  async getMyGroups(owner: User): Promise<MyGroupsOutput> {
+    try {
+      const groups = await this.group.find({
+        where: { owner: { id: owner.id } },
+      });
+      return {
+        ok: true,
+        groups,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹을 찾을 수 없습니다.',
+      };
+    }
   }
 
   async createGroup(
