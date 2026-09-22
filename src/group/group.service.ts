@@ -5,6 +5,7 @@ import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
 import { User } from '@/user/entities/user.entity';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
+import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 
 export class GroupService {
   constructor(
@@ -86,6 +87,48 @@ export class GroupService {
       return {
         ok: false,
         error: '그룹을 만들 수 없습니다.',
+      };
+    }
+  }
+
+  async editGroup(
+    owner: User,
+    editGroupInput: EditGroupInput,
+  ): Promise<EditGroupOutput> {
+    try {
+      const group = await this.group.findOne({
+        where: { id: editGroupInput.groupId },
+      });
+      if (!group) {
+        return {
+          ok: false,
+          error: '그룹을 수정할 수 없습니다.',
+        };
+      }
+      console.log('📢 [group.service.ts:그룹]', group.ownerId);
+      console.log('📢 [group.service.ts:오너]', owner.id);
+
+      const isNotAuthorizedOwner = owner.id !== group.ownerId;
+      if (isNotAuthorizedOwner) {
+        return {
+          ok: false,
+          error: '그룹장만 수정할 수 있습니다.',
+        };
+      }
+
+      await this.group.save([
+        {
+          id: editGroupInput.groupId,
+          ...editGroupInput,
+        },
+      ]);
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹을 수정할 수 없습니다.',
       };
     }
   }

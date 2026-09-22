@@ -6,6 +6,7 @@ import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
 import { GroupService } from './group.service';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
+import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 
 @Resolver(() => Group)
 export class GroupResolver {
@@ -35,5 +36,14 @@ export class GroupResolver {
     @Args('input') createGroupInput: CreateGroupInput,
   ): Promise<CreateGroupOutput> {
     return this.groupService.createGroup(authUser, createGroupInput);
+  }
+
+  // 그룹 수정
+  @Mutation(() => EditGroupOutput)
+  async editGroup(
+    @AuthUser() authUser: User,
+    @Args('input') editGroupInput: EditGroupInput,
+  ): Promise<EditGroupOutput> {
+    return this.groupService.editGroup(authUser, editGroupInput);
   }
 }
