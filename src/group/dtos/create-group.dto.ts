@@ -14,6 +14,7 @@ export class CreateGroupInput extends PickType(Group, [
   'name',
   'description',
   'groupImage',
+  'isPublic',
 ]) {}
 
 @ObjectType()

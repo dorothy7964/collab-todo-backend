@@ -24,9 +24,11 @@ export class Group extends CoreEntity {
   groupImage: string;
 
   @Column({
-    unique: true,
-    nullable: true,
+    default: true,
   })
+  @Field(() => Boolean)
+  isPublic: boolean;
+
   @Field(() => String, { nullable: true })
   @IsString()
   inviteCode?: string;

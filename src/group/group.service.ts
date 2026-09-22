@@ -58,12 +58,13 @@ export class GroupService {
     }
   }
 
+  // 그룹 생성
   async createGroup(
     owner: User,
     createGroupInput: CreateGroupInput,
   ): Promise<CreateGroupOutput> {
     try {
-      const { name, description, groupImage } = createGroupInput;
+      const { name, description, groupImage, isPublic } = createGroupInput;
       const groupExists = await this.group.findOne({
         where: { name },
       });
@@ -78,6 +79,7 @@ export class GroupService {
         name,
         description,
         groupImage: groupImage ?? '/images/default-groupImage.png',
+        isPublic,
       });
       newGroup.owner = owner;
       await this.group.save(newGroup);
@@ -91,6 +93,7 @@ export class GroupService {
     }
   }
 
+  // 그룹 수정
   async editGroup(
     owner: User,
     editGroupInput: EditGroupInput,
@@ -105,8 +108,6 @@ export class GroupService {
           error: '그룹을 수정할 수 없습니다.',
         };
       }
-      console.log('📢 [group.service.ts:그룹]', group.ownerId);
-      console.log('📢 [group.service.ts:오너]', owner.id);
 
       const isNotAuthorizedOwner = owner.id !== group.ownerId;
       if (isNotAuthorizedOwner) {
