@@ -9,6 +9,10 @@ import {
   CreateGroupMemberInput,
   CreateGroupMemberOutput,
 } from './dtos/create-group-member.dto';
+import {
+  GetGroupMembersInput,
+  GetGroupMembersOutput,
+} from './dtos/group-members.dto';
 
 @Injectable()
 export class GroupMemberService {
@@ -22,6 +26,30 @@ export class GroupMemberService {
     @InjectRepository(User)
     private readonly user: Repository<User>,
   ) {}
+
+  // 멤버 목록 조회
+  async getGroupMembers(
+    getGroupMembersInput: GetGroupMembersInput,
+  ): Promise<GetGroupMembersOutput> {
+    try {
+      const groupMembers = await this.groupMember.find({
+        where: {
+          group: { id: getGroupMembersInput.groupId },
+        },
+        relations: {
+          user: true,
+        },
+      });
+      console.log('📢 [group.service.ts:38]', groupMembers);
+      return { ok: true, groupMembers };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹 멤버를 찾을 수 없습니다.',
+      };
+    }
+  }
+
   // 그룹 가입
   async createGroupMember(
     authUser: User,
