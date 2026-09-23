@@ -1,8 +1,9 @@
 import { CoreEntity } from '@/common/entities/core.entity';
+import { GroupMember } from '@/group-member/entities/group-member.entity';
 import { User } from '@/user/entities/user.entity';
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
-import { Column, Entity, ManyToOne, RelationId } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, RelationId } from 'typeorm';
 
 @InputType('GroupInputType', { isAbstract: true })
 @ObjectType()
@@ -26,7 +27,7 @@ export class Group extends CoreEntity {
   @Column({
     default: true,
   })
-  @Field(() => Boolean)
+  @Field(() => Boolean, { nullable: true })
   isPublic: boolean;
 
   @Field(() => String, { nullable: true })
@@ -38,6 +39,9 @@ export class Group extends CoreEntity {
   // Group은 한 명의 소유자(Owner)를 가진다.
   // User는 여러 개의 Group을 소유할 수 있다.
   owner: User;
+
+  @OneToMany(() => GroupMember, (member) => member.group)
+  members: GroupMember[];
 
   @RelationId((group: Group) => group.owner)
   ownerId: number;

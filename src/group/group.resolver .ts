@@ -7,6 +7,7 @@ import { Group } from './entities/group.entity';
 import { GroupService } from './group.service';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
+import { Role } from '@/auth/role.decorator';
 
 @Resolver(() => Group)
 export class GroupResolver {
@@ -31,6 +32,7 @@ export class GroupResolver {
 
   // 그룹 생성
   @Mutation(() => CreateGroupOutput)
+  @Role(['Any'])
   async createGroup(
     @AuthUser() authUser: User,
     @Args('input') createGroupInput: CreateGroupInput,

@@ -1,4 +1,5 @@
 import { CoreEntity } from '@/common/entities/core.entity';
+import { GroupMember } from '@/group-member/entities/group-member.entity';
 import { Group } from '@/group/entities/group.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import {
@@ -58,6 +59,9 @@ export class User extends CoreEntity {
   // User는 여러 개의 Group을 소유할 수 있다.
   // 각 Group은 한 명의 소유자(Owner)를 가진다.
   ownedGroups: Group[];
+
+  @OneToMany(() => GroupMember, (member) => member.user)
+  groupMembers: GroupMember[];
 
   @BeforeInsert()
   @BeforeUpdate()

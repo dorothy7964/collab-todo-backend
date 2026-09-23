@@ -9,15 +9,16 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
+import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
+import { GroupMember } from './group-member/entities/group-member.entity';
+import { GroupMemberModule } from './group-member/group-member.module';
 import { Group } from './group/entities/group.entity';
 import { GroupModule } from './group/group.module';
+import { JwtMiddleware } from './jwt/jwt.middleware';
 import { JwtModule } from './jwt/jwt.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { JwtMiddleware } from './jwt/jwt.middleware';
-import { AuthModule } from './auth/auth.module';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -42,7 +43,7 @@ import { AuthModule } from './auth/auth.module';
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [User, Group],
+      entities: [User, Group, GroupMember],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -53,6 +54,7 @@ import { AuthModule } from './auth/auth.module';
       }),
     }),
     GroupModule,
+    GroupMemberModule,
     CommonModule,
     UserModule,
     JwtModule.forRoot({
