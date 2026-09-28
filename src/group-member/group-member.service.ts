@@ -13,6 +13,10 @@ import {
   GetGroupMembersInput,
   GetGroupMembersOutput,
 } from './dtos/group-members.dto';
+import {
+  InviteGroupMemberInput,
+  InviteGroupMemberOutput,
+} from './dtos/invite-group-member.dto';
 
 @Injectable()
 export class GroupMemberService {
@@ -111,5 +115,71 @@ export class GroupMemberService {
     });
 
     return this.groupMember.save(groupMember);
+  }
+
+  // 그룹 멤버 초대
+  async inviteGroupMember(
+    authUser: User,
+    inviteGroupMemberInput: InviteGroupMemberInput,
+  ): Promise<InviteGroupMemberOutput> {
+    try {
+      const { groupId, userId } = inviteGroupMemberInput;
+
+      const group = await this.group.findOne({
+        where: { id: groupId },
+      });
+
+      if (!group) {
+        return {
+          ok: false,
+          error: '그룹을 찾을 수 없습니다.',
+        };
+      }
+
+      // 그룹장인지 확인
+      if (group.ownerId !== authUser.id) {
+        return {
+          ok: false,
+          error: '그룹장만 멤버를 초대할 수 있습니다.',
+        };
+      }
+
+      const user = await this.user.findOne({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        return {
+          ok: false,
+          error: '사용자를 찾을 수 없습니다.',
+        };
+      }
+
+      // 이미 그룹에 속해 있는지 확인
+      const exists = await this.groupMember.findOne({
+        where: {
+          group: { id: groupId },
+          user: { id: userId },
+        },
+      });
+
+      if (exists) {
+        return {
+          ok: false,
+          error: '이미 그룹에 속한 사용자입니다.',
+        };
+      }
+
+      await this.saveGroupMember(user, group, GroupMemberRole.MEMBER);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹 멤버 초대에 실패했습니다.',
+      };
+    }
   }
 }

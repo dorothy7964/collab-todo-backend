@@ -13,6 +13,10 @@ import {
 } from './dtos/group-members.dto';
 import { GroupMember } from './entities/group-member.entity';
 import { GroupMemberService } from './group-member.service';
+import {
+  InviteGroupMemberInput,
+  InviteGroupMemberOutput,
+} from './dtos/invite-group-member.dto';
 
 @Resolver(() => GroupMember)
 export class GroupMemberResolver {
@@ -36,6 +40,18 @@ export class GroupMemberResolver {
     return this.groupMemberService.createGroupMember(
       authUser,
       createGroupMemberInput,
+    );
+  }
+
+  // 그룹 멤버 초대 (권한: 그룹장)
+  @Mutation(() => InviteGroupMemberOutput)
+  async inviteGroupMember(
+    @AuthUser() authUser: User,
+    @Args('input') inviteGroupMemberInput: InviteGroupMemberInput,
+  ) {
+    return this.groupMemberService.inviteGroupMember(
+      authUser,
+      inviteGroupMemberInput,
     );
   }
 }
