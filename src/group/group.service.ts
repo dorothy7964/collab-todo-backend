@@ -1,3 +1,5 @@
+import { GroupMemberRole } from '@/group-member/entities/group-member.entity';
+import { GroupMemberService } from '@/group-member/group-member.service';
 import { User } from '@/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,8 +9,6 @@ import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
-import { GroupMemberService } from '@/group-member/group-member.service';
-import { GroupMemberRole } from '@/group-member/entities/group-member.entity';
 
 export class GroupService {
   constructor(

@@ -21,6 +21,11 @@ import {
   RemoveGroupMemberInput,
   RemoveGroupMemberOutput,
 } from './dtos/remove-group-member.dto';
+import {
+  UnbanGroupMemberInput,
+  UnbanGroupMemberOutput,
+} from './dtos/unban-group-member.dto';
+import { LeaveGroupInput, LeaveGroupOutput } from './dtos/leave-group.dto';
 
 @Resolver(() => GroupMember)
 export class GroupMemberResolver {
@@ -69,5 +74,26 @@ export class GroupMemberResolver {
       authUser,
       removeGroupMemberInput,
     );
+  }
+
+  // 그룹 멤버 재가입 허용
+  @Mutation(() => UnbanGroupMemberOutput)
+  async unbanGroupMember(
+    @AuthUser() authUser: User,
+    @Args('input') unbanGroupMemberInput: UnbanGroupMemberInput,
+  ): Promise<UnbanGroupMemberOutput> {
+    return this.groupMemberService.unbanGroupMember(
+      authUser,
+      unbanGroupMemberInput,
+    );
+  }
+
+  // 그룹 나가기
+  @Mutation(() => LeaveGroupOutput)
+  async leaveGroup(
+    @AuthUser() authUser: User,
+    @Args('input') leaveGroupInput: LeaveGroupInput,
+  ): Promise<LeaveGroupOutput> {
+    return this.groupMemberService.leaveGroup(authUser, leaveGroupInput);
   }
 }

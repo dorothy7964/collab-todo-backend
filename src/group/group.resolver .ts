@@ -1,14 +1,14 @@
 import { AuthUser } from '@/auth/auth-user.decorator';
+import { Role } from '@/auth/role.decorator';
 import { User } from '@/user/entities/user.entity';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
+import { DeleteGroupInput, DeleteGroupOutput } from './dtos/delete-group.dto';
+import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
+import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
 import { GroupService } from './group.service';
-import { GroupInput, GroupOutput } from './dtos/group.dto';
-import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
-import { Role } from '@/auth/role.decorator';
-import { DeleteGroupInput, DeleteGroupOutput } from './dtos/delete-group.dto';
 
 @Resolver(() => Group)
 export class GroupResolver {

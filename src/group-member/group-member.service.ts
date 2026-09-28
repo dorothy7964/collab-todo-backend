@@ -22,6 +22,11 @@ import {
   RemoveGroupMemberInput,
   RemoveGroupMemberOutput,
 } from './dtos/remove-group-member.dto';
+import {
+  UnbanGroupMemberInput,
+  UnbanGroupMemberOutput,
+} from './dtos/unban-group-member.dto';
+import { LeaveGroupInput, LeaveGroupOutput } from './dtos/leave-group.dto';
 
 @Injectable()
 export class GroupMemberService {
@@ -296,6 +301,115 @@ export class GroupMemberService {
       return {
         ok: false,
         error: '그룹 멤버를 내보낼 수 없습니다.',
+      };
+    }
+  }
+
+  // 그룹 멤버 재가입 허용
+  async unbanGroupMember(
+    authUser: User,
+    unbanGroupMemberInput: UnbanGroupMemberInput,
+  ): Promise<UnbanGroupMemberOutput> {
+    try {
+      const { groupId, userId } = unbanGroupMemberInput;
+
+      const group = await this.group.findOne({
+        where: {
+          id: groupId,
+        },
+        relations: {
+          owner: true,
+        },
+      });
+
+      if (!group) {
+        return {
+          ok: false,
+          error: '그룹을 찾을 수 없습니다.',
+        };
+      }
+
+      // 그룹장만 재가입 허용 가능
+      if (group.ownerId !== authUser.id) {
+        return {
+          ok: false,
+          error: '그룹장만 멤버의 재가입을 허용할 수 있습니다.',
+        };
+      }
+
+      // 차단 기록 확인
+      const ban = await this.groupMemberBan.findOne({
+        where: {
+          group: { id: groupId },
+          user: { id: userId },
+        },
+      });
+
+      if (!ban) {
+        return {
+          ok: false,
+          error: '해당 사용자는 차단된 상태가 아닙니다.',
+        };
+      }
+
+      // 차단 해제
+      await this.groupMemberBan.remove(ban);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹 멤버 재가입 허용에 실패했습니다.',
+      };
+    }
+  }
+
+  // 그룹 나가기
+  async leaveGroup(
+    authUser: User,
+    leaveGroupInput: LeaveGroupInput,
+  ): Promise<LeaveGroupOutput> {
+    try {
+      const { groupId } = leaveGroupInput;
+
+      const groupMember = await this.groupMember.findOne({
+        where: {
+          group: { id: groupId },
+          user: { id: authUser.id },
+        },
+        relations: {
+          group: true,
+          user: true,
+        },
+      });
+
+      if (!groupMember) {
+        return {
+          ok: false,
+          error: '해당 그룹의 멤버가 아닙니다.',
+        };
+      }
+
+      // 그룹장은 그룹장 권한을 넘긴 후 나갈 수 있음
+      if (groupMember.role === GroupMemberRole.OWNER) {
+        return {
+          ok: false,
+          error: '그룹장은 그룹을 나갈 수 없습니다.',
+          // '그룹장은 그룹장 권한을 다른 멤버에게 넘긴 후 나갈 수 있습니다.',
+        };
+      }
+
+      await this.groupMember.remove(groupMember);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹 나가기에 실패했습니다.',
       };
     }
   }
