@@ -50,7 +50,7 @@ export class GroupMemberService {
     }
   }
 
-  // 그룹 가입
+  // 그룹 가입 (일반적인 그룹 가입)
   async createGroupMember(
     authUser: User,
     createGroupMemberInput: CreateGroupMemberInput,
@@ -68,34 +68,6 @@ export class GroupMemberService {
           error: '그룹을 찾을 수 없습니다.',
         };
       }
-
-      // 그룹장인지 확인
-      // const groupMember = await this.groupMember.findOne({
-      //   where: {
-      //     group: { id: createGroupMemberInput.groupId },
-      //     user: { id: authUser.id },
-      //   },
-      // });
-
-      // if (!groupMember) {
-      //   return {
-      //     ok: false,
-      //     error: '그룹 멤버를 추가할 권한이 없습니다.',
-      //   };
-      // }
-
-      // const user = await this.user.findOne({
-      //   where: {
-      //     id: authUser.id,
-      //   },
-      // });
-
-      // if (!user) {
-      //   return {
-      //     ok: false,
-      //     error: '사용자를 찾을 수 없습니다.',
-      //   };
-      // }
 
       // 이미 그룹에 속해 있는지 확인
       const exists = await this.groupMember.findOne({
@@ -124,5 +96,20 @@ export class GroupMemberService {
         error: '그룹 멤버 추가에 실패했습니다.',
       };
     }
+  }
+
+  // 특정 사용자를 그룹 멤버로 추가
+  async saveGroupMember(
+    user: User,
+    group: Group,
+    role: 'owner' | 'member',
+  ): Promise<GroupMember> {
+    const groupMember = this.groupMember.create({
+      group,
+      user,
+      role,
+    });
+
+    return this.groupMember.save(groupMember);
   }
 }

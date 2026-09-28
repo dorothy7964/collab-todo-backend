@@ -7,11 +7,13 @@ import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
+import { GroupMemberService } from '@/group-member/group.service';
 
 export class GroupService {
   constructor(
     @InjectRepository(Group)
     private readonly group: Repository<Group>,
+    private readonly groupMemberService: GroupMemberService,
   ) {}
   getAll(): Promise<Group[]> {
     return this.group.find();
@@ -84,6 +86,9 @@ export class GroupService {
       });
       newGroup.owner = owner;
       await this.group.save(newGroup);
+
+      // 그룹 생성자를 멤버로 추가
+      await this.groupMemberService.saveGroupMember(owner, newGroup, 'owner');
 
       return { ok: true, groupId: newGroup.id };
     } catch {
