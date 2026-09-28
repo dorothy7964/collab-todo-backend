@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GroupMember } from './entities/group-member.entity';
-import { GroupMemberResolver } from './group.resolver ';
-import { GroupMemberService } from './group.service';
+import { GroupMemberResolver } from './group-member.resolver ';
+import { GroupMemberService } from './group-member.service';
 import { Group } from '@/group/entities/group.entity';
 import { User } from '@/user/entities/user.entity';
 

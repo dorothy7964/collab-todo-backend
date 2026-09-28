@@ -7,7 +7,8 @@ import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
-import { GroupMemberService } from '@/group-member/group.service';
+import { GroupMemberService } from '@/group-member/group-member.service';
+import { GroupMemberRole } from '@/group-member/entities/group-member.entity';
 
 export class GroupService {
   constructor(
@@ -88,7 +89,11 @@ export class GroupService {
       await this.group.save(newGroup);
 
       // 그룹 생성자를 멤버로 추가
-      await this.groupMemberService.saveGroupMember(owner, newGroup, 'owner');
+      await this.groupMemberService.saveGroupMember(
+        owner,
+        newGroup,
+        GroupMemberRole.OWNER,
+      );
 
       return { ok: true, groupId: newGroup.id };
     } catch {

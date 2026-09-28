@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { GroupMember } from './entities/group-member.entity';
+import { GroupMember, GroupMemberRole } from './entities/group-member.entity';
 import { Group } from '@/group/entities/group.entity';
 import { User } from '@/user/entities/user.entity';
 import {
@@ -102,7 +102,7 @@ export class GroupMemberService {
   async saveGroupMember(
     user: User,
     group: Group,
-    role: 'owner' | 'member',
+    role: GroupMemberRole,
   ): Promise<GroupMember> {
     const groupMember = this.groupMember.create({
       group,

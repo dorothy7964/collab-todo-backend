@@ -12,7 +12,7 @@ import {
   GetGroupMembersOutput,
 } from './dtos/group-members.dto';
 import { GroupMember } from './entities/group-member.entity';
-import { GroupMemberService } from './group.service';
+import { GroupMemberService } from './group-member.service';
 
 @Resolver(() => GroupMember)
 export class GroupMemberResolver {
