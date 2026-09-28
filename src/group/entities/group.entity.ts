@@ -3,7 +3,14 @@ import { GroupMember } from '@/group-member/entities/group-member.entity';
 import { User } from '@/user/entities/user.entity';
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsString } from 'class-validator';
-import { Column, Entity, ManyToOne, OneToMany, RelationId } from 'typeorm';
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  RelationId,
+} from 'typeorm';
 
 @InputType('GroupInputType', { isAbstract: true })
 @ObjectType()
@@ -45,4 +52,6 @@ export class Group extends CoreEntity {
 
   @RelationId((group: Group) => group.owner)
   ownerId: number;
+
+  @DeleteDateColumn({ nullable: true }) deletedAt?: Date;
 }

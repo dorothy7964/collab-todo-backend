@@ -8,6 +8,7 @@ import { GroupService } from './group.service';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 import { Role } from '@/auth/role.decorator';
+import { DeleteGroupInput, DeleteGroupOutput } from './dtos/delete-group.dto';
 
 @Resolver(() => Group)
 export class GroupResolver {
@@ -47,5 +48,14 @@ export class GroupResolver {
     @Args('input') editGroupInput: EditGroupInput,
   ): Promise<EditGroupOutput> {
     return this.groupService.editGroup(authUser, editGroupInput);
+  }
+
+  // 그룹 삭제
+  @Mutation(() => DeleteGroupOutput)
+  async deleteGroup(
+    @AuthUser() authUser: User,
+    @Args('input') deleteGroupInput: DeleteGroupInput,
+  ): Promise<DeleteGroupOutput> {
+    return this.groupService.deleteGroup(authUser, deleteGroupInput);
   }
 }

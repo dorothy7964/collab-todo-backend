@@ -1,11 +1,12 @@
+import { User } from '@/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Group } from './entities/group.entity';
 import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
-import { User } from '@/user/entities/user.entity';
-import { MyGroupsOutput } from './dtos/my-groups.dto';
-import { GroupInput, GroupOutput } from './dtos/group.dto';
+import { DeleteGroupInput, DeleteGroupOutput } from './dtos/delete-group.dto';
 import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
+import { GroupInput, GroupOutput } from './dtos/group.dto';
+import { MyGroupsOutput } from './dtos/my-groups.dto';
+import { Group } from './entities/group.entity';
 
 export class GroupService {
   constructor(
@@ -130,6 +131,41 @@ export class GroupService {
       return {
         ok: false,
         error: '그룹을 수정할 수 없습니다.',
+      };
+    }
+  }
+
+  // 그룹 삭제
+  async deleteGroup(
+    owner: User,
+    deleteGroupInput: DeleteGroupInput,
+  ): Promise<DeleteGroupOutput> {
+    try {
+      const group = await this.group.findOne({
+        where: { id: deleteGroupInput.groupId },
+      });
+
+      if (!group) {
+        return {
+          ok: false,
+          error: '존재하지 않는 그룹입니다.',
+        };
+      }
+
+      if (owner.id !== group.ownerId) {
+        return {
+          ok: false,
+          error: '그룹장만 그룹을 삭제할 수 있습니다.',
+        };
+      }
+
+      await this.group.softRemove(group);
+
+      return { ok: true };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹 삭제를 할 수 없습니다.',
       };
     }
   }
