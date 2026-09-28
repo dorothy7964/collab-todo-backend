@@ -5,9 +5,12 @@ import { GroupMemberResolver } from './group-member.resolver ';
 import { GroupMemberService } from './group-member.service';
 import { Group } from '@/group/entities/group.entity';
 import { User } from '@/user/entities/user.entity';
+import { GroupMemberBan } from './entities/group-member-ban.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([GroupMember, Group, User])],
+  imports: [
+    TypeOrmModule.forFeature([GroupMember, GroupMemberBan, Group, User]),
+  ],
   providers: [GroupMemberResolver, GroupMemberService],
   exports: [GroupMemberService],
 })

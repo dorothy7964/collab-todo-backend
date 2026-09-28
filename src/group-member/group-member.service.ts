@@ -17,12 +17,20 @@ import {
   InviteGroupMemberInput,
   InviteGroupMemberOutput,
 } from './dtos/invite-group-member.dto';
+import { GroupMemberBan } from './entities/group-member-ban.entity';
+import {
+  RemoveGroupMemberInput,
+  RemoveGroupMemberOutput,
+} from './dtos/remove-group-member.dto';
 
 @Injectable()
 export class GroupMemberService {
   constructor(
     @InjectRepository(GroupMember)
     private readonly groupMember: Repository<GroupMember>,
+
+    @InjectRepository(GroupMemberBan)
+    private readonly groupMemberBan: Repository<GroupMemberBan>,
 
     @InjectRepository(Group)
     private readonly group: Repository<Group>,
@@ -179,6 +187,84 @@ export class GroupMemberService {
       return {
         ok: false,
         error: '그룹 멤버 초대에 실패했습니다.',
+      };
+    }
+  }
+
+  // 그룹 내보내기 (권한: 그룹장)
+  async removeGroupMember(
+    authUser: User,
+    removeGroupMemberInput: RemoveGroupMemberInput,
+  ): Promise<RemoveGroupMemberOutput> {
+    try {
+      const { groupId, userId } = removeGroupMemberInput;
+
+      // 그룹 조회
+      const group = await this.group.findOne({
+        where: { id: groupId },
+        relations: { owner: true },
+      });
+
+      if (!group) {
+        return {
+          ok: false,
+          error: '그룹을 찾을 수 없습니다.',
+        };
+      }
+
+      // 그룹장인지 확인
+      if (group.ownerId !== authUser.id) {
+        return {
+          ok: false,
+          error: '그룹장만 멤버를 내보낼 수 있습니다.',
+        };
+      }
+
+      // 그룹장 본인은 내보낼 수 없음
+      if (userId === group.ownerId) {
+        return {
+          ok: false,
+          error: '그룹장은 내보낼 수 없습니다.',
+        };
+      }
+
+      // 멤버 조회
+      const groupMember = await this.groupMember.findOne({
+        where: {
+          group: { id: groupId },
+          user: { id: userId },
+        },
+        relations: {
+          user: true,
+          group: true,
+        },
+      });
+
+      if (!groupMember) {
+        return {
+          ok: false,
+          error: '해당 사용자는 그룹 멤버가 아닙니다.',
+        };
+      }
+
+      // 차단 기록 생성
+      const ban = this.groupMemberBan.create({
+        group,
+        user: groupMember.user,
+      });
+
+      await this.groupMemberBan.save(ban);
+
+      // 멤버에서 제거
+      await this.groupMember.remove(groupMember);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '그룹 멤버를 내보낼 수 없습니다.',
       };
     }
   }

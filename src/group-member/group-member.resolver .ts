@@ -17,6 +17,10 @@ import {
   InviteGroupMemberInput,
   InviteGroupMemberOutput,
 } from './dtos/invite-group-member.dto';
+import {
+  RemoveGroupMemberInput,
+  RemoveGroupMemberOutput,
+} from './dtos/remove-group-member.dto';
 
 @Resolver(() => GroupMember)
 export class GroupMemberResolver {
@@ -52,6 +56,18 @@ export class GroupMemberResolver {
     return this.groupMemberService.inviteGroupMember(
       authUser,
       inviteGroupMemberInput,
+    );
+  }
+
+  // 그룹 내보내기 (권한: 그룹장)
+  @Mutation(() => RemoveGroupMemberOutput)
+  async removeGroupMember(
+    @AuthUser() authUser: User,
+    @Args('input') removeGroupMemberInput: RemoveGroupMemberInput,
+  ): Promise<RemoveGroupMemberOutput> {
+    return this.groupMemberService.removeGroupMember(
+      authUser,
+      removeGroupMemberInput,
     );
   }
 }
