@@ -62,6 +62,21 @@ export class GroupMemberService {
     }
   }
 
+  // 그룹 내보낸 맴버 재가입 방지
+  private async isGroupMemberBanned(
+    groupId: number,
+    userId: number,
+  ): Promise<boolean> {
+    const banned = await this.groupMemberBan.findOne({
+      where: {
+        group: { id: groupId },
+        user: { id: userId },
+      },
+    });
+
+    return !!banned;
+  }
+
   // 그룹 가입 (일반적인 그룹 가입)
   async createGroupMember(
     authUser: User,
@@ -93,6 +108,14 @@ export class GroupMemberService {
         return {
           ok: false,
           error: '이미 그룹에 속한 사용자입니다.',
+        };
+      }
+
+      // 재가입 차단 여부 확인
+      if (await this.isGroupMemberBanned(group.id, authUser.id)) {
+        return {
+          ok: false,
+          error: '해당 그룹에서 내보내진 사용자는 다시 가입할 수 없습니다.',
         };
       }
 
@@ -175,6 +198,14 @@ export class GroupMemberService {
         return {
           ok: false,
           error: '이미 그룹에 속한 사용자입니다.',
+        };
+      }
+
+      // 재가입 차단 여부 확인
+      if (await this.isGroupMemberBanned(group.id, user.id)) {
+        return {
+          ok: false,
+          error: '해당 그룹에서 내보내진 사용자는 다시 가입할 수 없습니다.',
         };
       }
 
