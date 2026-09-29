@@ -20,6 +20,7 @@ import { JwtModule } from './jwt/jwt.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { GroupMemberBan } from './group-member/entities/group-member-ban.entity';
+import { Category } from './category/entities/category.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,7 +45,7 @@ import { GroupMemberBan } from './group-member/entities/group-member-ban.entity'
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [User, Group, GroupMember, GroupMemberBan],
+      entities: [User, Group, GroupMember, GroupMemberBan, Category],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

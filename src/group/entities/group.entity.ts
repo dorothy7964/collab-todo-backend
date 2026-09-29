@@ -1,3 +1,4 @@
+import { Category } from '@/category/entities/category.entity';
 import { CoreEntity } from '@/common/entities/core.entity';
 import { GroupMember } from '@/group-member/entities/group-member.entity';
 import { User } from '@/user/entities/user.entity';
@@ -52,6 +53,9 @@ export class Group extends CoreEntity {
 
   @RelationId((group: Group) => group.owner)
   ownerId: number;
+
+  @OneToMany(() => Category, (category) => category.group)
+  categories: Category[];
 
   @DeleteDateColumn({ nullable: true }) deletedAt?: Date;
 }
