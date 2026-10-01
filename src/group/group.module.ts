@@ -8,5 +8,6 @@ import { GroupResolver } from './group.resolver ';
 @Module({
   imports: [TypeOrmModule.forFeature([Group]), GroupMemberModule],
   providers: [GroupResolver, GroupService],
+  exports: [GroupService],
 })
 export class GroupModule {}

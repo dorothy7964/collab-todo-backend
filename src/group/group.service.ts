@@ -20,12 +20,18 @@ export class GroupService {
     return this.group.find();
   }
 
+  // 그룹 ID로 그룹 조회 (Service 내부 사용)
+  async getGroupById(groupId: number): Promise<Group | null> {
+    return this.group.findOne({
+      where: { id: groupId },
+    });
+  }
+
   // 그룹 상세 조회
   async findGroupById({ groupId }: GroupInput): Promise<GroupOutput> {
     try {
-      const group = await this.group.findOne({
-        where: { id: groupId },
-      });
+      const group = await this.getGroupById(groupId);
+
       if (!group) {
         return {
           ok: false,
@@ -82,7 +88,7 @@ export class GroupService {
       const newGroup = this.group.create({
         name,
         description,
-        groupImage: groupImage ?? '/images/default-groupImage.png',
+        groupImage,
         isPublic,
       });
       newGroup.owner = owner;
@@ -110,9 +116,8 @@ export class GroupService {
     editGroupInput: EditGroupInput,
   ): Promise<EditGroupOutput> {
     try {
-      const group = await this.group.findOne({
-        where: { id: editGroupInput.groupId },
-      });
+      const group = await this.getGroupById(editGroupInput.groupId);
+
       if (!group) {
         return {
           ok: false,
@@ -151,9 +156,7 @@ export class GroupService {
     deleteGroupInput: DeleteGroupInput,
   ): Promise<DeleteGroupOutput> {
     try {
-      const group = await this.group.findOne({
-        where: { id: deleteGroupInput.groupId },
-      });
+      const group = await this.getGroupById(deleteGroupInput.groupId);
 
       if (!group) {
         return {

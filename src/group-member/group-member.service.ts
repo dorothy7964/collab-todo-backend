@@ -44,19 +44,40 @@ export class GroupMemberService {
     private readonly user: Repository<User>,
   ) {}
 
+  // 그룹 ID와 사용자 ID로 그룹 멤버 조회 (Service 내부 사용)
+  async findGroupMember(
+    groupId: number,
+    userId: number,
+  ): Promise<GroupMember | null> {
+    return this.groupMember.findOne({
+      where: {
+        group: { id: groupId },
+        user: { id: userId },
+      },
+    });
+  }
+
+  // 그룹 ID로 전체 그룹 멤버 조회 (Service 내부 사용)
+  async findMembersByGroupId(groupId: number): Promise<GroupMember[]> {
+    return this.groupMember.find({
+      where: {
+        group: { id: groupId },
+      },
+      relations: {
+        user: true,
+      },
+    });
+  }
+
   // 멤버 목록 조회
   async getGroupMembers(
     getGroupMembersInput: GetGroupMembersInput,
   ): Promise<GetGroupMembersOutput> {
     try {
-      const groupMembers = await this.groupMember.find({
-        where: {
-          group: { id: getGroupMembersInput.groupId },
-        },
-        relations: {
-          user: true,
-        },
-      });
+      const groupMembers = await this.findMembersByGroupId(
+        getGroupMembersInput.groupId,
+      );
+
       console.log('📢 [group.service.ts:38]', groupMembers);
       return { ok: true, groupMembers };
     } catch {

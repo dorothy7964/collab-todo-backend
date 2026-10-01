@@ -13,9 +13,11 @@ import { Group } from '../entities/group.entity';
 export class CreateGroupInput extends PickType(Group, [
   'name',
   'description',
-  'groupImage',
   'isPublic',
-]) {}
+]) {
+  @Field(() => String, { nullable: true })
+  groupImage?: string;
+}
 
 @ObjectType()
 export class CreateGroupOutput extends PartialType(CoreOutput) {

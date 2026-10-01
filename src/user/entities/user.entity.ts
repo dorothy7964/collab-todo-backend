@@ -50,7 +50,7 @@ export class User extends CoreEntity {
   @IsString()
   nickname: string;
 
-  @Column({ default: '/images/default-profile.png' })
+  @Column({ default: 'default-profile.png' })
   @Field(() => String)
   @IsString()
   profileImage: string;

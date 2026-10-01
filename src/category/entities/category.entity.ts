@@ -12,6 +12,11 @@ export class Category extends CoreEntity {
   @IsString()
   name: string;
 
+  @Column({ default: 'default-category.png' })
+  @Field(() => String)
+  @IsString()
+  categoryImage: string;
+
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
   @IsOptional()

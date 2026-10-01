@@ -27,7 +27,7 @@ export class Group extends CoreEntity {
   @IsString()
   description?: string;
 
-  @Column({ default: '/images/default-groupImage.png' })
+  @Column({ default: 'default-groupImage.png' })
   @Field(() => String)
   @IsString()
   groupImage: string;

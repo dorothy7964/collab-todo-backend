@@ -21,6 +21,7 @@ import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { GroupMemberBan } from './group-member/entities/group-member-ban.entity';
 import { Category } from './category/entities/category.entity';
+import { CategoryModule } from './category/category.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -63,6 +64,7 @@ import { Category } from './category/entities/category.entity';
       privateKey: process.env.PRIVATE_KEY,
     }),
     AuthModule,
+    CategoryModule,
   ],
 })
 export class AppModule implements NestModule {
