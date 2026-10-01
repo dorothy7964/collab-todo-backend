@@ -7,6 +7,10 @@ import {
 } from './dtos/create-category.dto';
 import { CategoryService } from './category.service';
 import { Category } from './entities/category.entity';
+import {
+  UpdateCategoryInput,
+  UpdateCategoryOutput,
+} from './dtos/update-category.dto';
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -19,5 +23,14 @@ export class CategoryResolver {
     @Args('input') createCategoryInput: CreateCategoryInput,
   ): Promise<CreateCategoryOutput> {
     return this.categoryService.createCategory(authUser, createCategoryInput);
+  }
+
+  // 카테고리 수정
+  @Mutation(() => UpdateCategoryOutput)
+  async updateCategory(
+    @AuthUser() authUser: User,
+    @Args('input') updateCategoryInput: UpdateCategoryInput,
+  ): Promise<UpdateCategoryOutput> {
+    return this.categoryService.updateCategory(authUser, updateCategoryInput);
   }
 }

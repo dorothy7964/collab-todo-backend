@@ -1,9 +1,10 @@
 import { CoreEntity } from '@/common/entities/core.entity';
 import { Group } from '@/group/entities/group.entity';
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsOptional, IsString } from 'class-validator';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
+@InputType('CategoryInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class Category extends CoreEntity {
@@ -27,7 +28,7 @@ export class Category extends CoreEntity {
   @ManyToOne(() => Group, (group) => group.categories)
   group: Group;
 
-  @Column({ default: 0 })
-  @Field(() => Int)
-  sortOrder: number;
+  @Column({ default: 0, nullable: true })
+  @Field(() => Int, { nullable: true })
+  sortOrder?: number;
 }
