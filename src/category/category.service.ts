@@ -15,6 +15,10 @@ import {
 } from './dtos/update-category.dto';
 import { Category } from './entities/category.entity';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
+import {
+  DeleteCategoryInput,
+  DeleteCategoryOutput,
+} from './dtos/delete-category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -47,6 +51,19 @@ export class CategoryService {
     return !!existingCategory;
   }
 
+  // 카테고리 존재 여부 및 그룹 소속 확인 (내부용)
+  private async findCategoryById(
+    categoryId: number,
+    groupId: number,
+  ): Promise<Category | null> {
+    return this.category.findOne({
+      where: {
+        id: categoryId,
+        group: { id: groupId },
+      },
+    });
+  }
+
   // 그룹 멤버 여부 확인 (내부용)
   private async checkGroupMember(
     groupId: number,
@@ -67,9 +84,9 @@ export class CategoryService {
   ): Promise<CategoryOutput> {
     try {
       const { categoryId, groupId } = categoryInput;
-      const category = await this.category.findOne({
-        where: { id: categoryId, group: { id: groupId } },
-      });
+
+      // 카테고리 존재 여부 및 그룹 소속 확인
+      const category = await this.findCategoryById(categoryId, groupId);
 
       if (!category) {
         return { ok: false, error: '해당 카테고리를 조회할 수 없습니다.' };
@@ -164,13 +181,8 @@ export class CategoryService {
     try {
       const { groupId, categoryId, ...updateData } = updateCategoryInput;
 
-      // 카테고리 존재 여부 확인
-      const category = await this.category.findOne({
-        where: {
-          id: categoryId,
-          group: { id: groupId },
-        },
-      });
+      // 카테고리 존재 여부 및 그룹 소속 확인
+      const category = await this.findCategoryById(categoryId, groupId);
 
       if (!category) {
         return {
@@ -219,6 +231,45 @@ export class CategoryService {
       return {
         ok: false,
         error: '카테고리를 수정할 수 없습니다.',
+      };
+    }
+  }
+
+  // 카테고리 삭제
+  async deleteCategory(
+    owner: User,
+    deleteCategoryInput: DeleteCategoryInput,
+  ): Promise<DeleteCategoryOutput> {
+    try {
+      const { categoryId, groupId } = deleteCategoryInput;
+
+      // 카테고리 존재 여부 및 그룹 소속 확인
+      const category = await this.findCategoryById(categoryId, groupId);
+
+      if (!category) {
+        return {
+          ok: false,
+          error: '해당 그룹에 속한 카테고리가 존재하지 않습니다.',
+        };
+      }
+
+      if (owner.id !== groupId) {
+        return {
+          ok: false,
+          error: '그룹장만 그룹을 삭제할 수 있습니다.',
+        };
+      }
+
+      // 카테고리 Hard Delete
+      await this.category.remove(category);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '카테고리를 삭제할 수 없습니다.',
       };
     }
   }

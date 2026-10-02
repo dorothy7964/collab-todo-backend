@@ -12,6 +12,10 @@ import {
   UpdateCategoryOutput,
 } from './dtos/update-category.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
+import {
+  DeleteCategoryInput,
+  DeleteCategoryOutput,
+} from './dtos/delete-category.dto';
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -42,5 +46,14 @@ export class CategoryResolver {
     @Args('input') updateCategoryInput: UpdateCategoryInput,
   ): Promise<UpdateCategoryOutput> {
     return this.categoryService.updateCategory(authUser, updateCategoryInput);
+  }
+
+  // 카테고리 삭제 (Hard Delete)
+  @Mutation(() => DeleteCategoryOutput)
+  async deleteCategory(
+    @AuthUser() user: User,
+    @Args('input') deleteCategoryInput: DeleteCategoryInput,
+  ): Promise<DeleteCategoryOutput> {
+    return this.categoryService.deleteCategory(user, deleteCategoryInput);
   }
 }
