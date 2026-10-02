@@ -5,10 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
 import { DeleteGroupInput, DeleteGroupOutput } from './dtos/delete-group.dto';
-import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
+import { UpdateGroupInput, UpdateGroupOutput } from './dtos/update-group-dto';
 
 export class GroupService {
   constructor(
@@ -111,12 +111,12 @@ export class GroupService {
   }
 
   // 그룹 수정
-  async editGroup(
+  async updateGroup(
     owner: User,
-    editGroupInput: EditGroupInput,
-  ): Promise<EditGroupOutput> {
+    updateGroupInput: UpdateGroupInput,
+  ): Promise<UpdateGroupOutput> {
     try {
-      const group = await this.getGroupById(editGroupInput.groupId);
+      const group = await this.getGroupById(updateGroupInput.groupId);
 
       if (!group) {
         return {
@@ -135,8 +135,8 @@ export class GroupService {
 
       await this.group.save([
         {
-          id: editGroupInput.groupId,
-          ...editGroupInput,
+          id: updateGroupInput.groupId,
+          ...updateGroupInput,
         },
       ]);
       return {

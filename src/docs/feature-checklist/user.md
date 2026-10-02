@@ -36,7 +36,7 @@
 - ✅ AuthGuard 적용
 - ✅ 예외 처리
 
-### ✏️ 회원 정보 수정 (`editProfile`)
+### ✏️ 회원 정보 수정 (`updateProfile`)
 
 - ✅ 비밀번호 수정
 - ✅ 닉네임 수정

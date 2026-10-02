@@ -4,11 +4,11 @@ import { User } from '@/user/entities/user.entity';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CreateGroupInput, CreateGroupOutput } from './dtos/create-group.dto';
 import { DeleteGroupInput, DeleteGroupOutput } from './dtos/delete-group.dto';
-import { EditGroupInput, EditGroupOutput } from './dtos/edit-group-dto';
 import { GroupInput, GroupOutput } from './dtos/group.dto';
 import { MyGroupsOutput } from './dtos/my-groups.dto';
 import { Group } from './entities/group.entity';
 import { GroupService } from './group.service';
+import { UpdateGroupInput, UpdateGroupOutput } from './dtos/update-group-dto';
 
 @Resolver(() => Group)
 export class GroupResolver {
@@ -42,12 +42,12 @@ export class GroupResolver {
   }
 
   // 그룹 수정
-  @Mutation(() => EditGroupOutput)
-  async editGroup(
+  @Mutation(() => UpdateGroupOutput)
+  async updateGroup(
     @AuthUser() authUser: User,
-    @Args('input') editGroupInput: EditGroupInput,
-  ): Promise<EditGroupOutput> {
-    return this.groupService.editGroup(authUser, editGroupInput);
+    @Args('input') updateGroupInput: UpdateGroupInput,
+  ): Promise<UpdateGroupOutput> {
+    return this.groupService.updateGroup(authUser, updateGroupInput);
   }
 
   // 그룹 삭제

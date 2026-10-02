@@ -3,9 +3,9 @@ import { User } from '../entities/user.entity';
 import { CoreOutput } from '@/common/dtos/output.dto';
 
 @ObjectType()
-export class EditProfileOutput extends PartialType(CoreOutput) {}
+export class UpdateProfileOutput extends PartialType(CoreOutput) {}
 
 @InputType()
-export class EditProfileInput extends PartialType(
+export class UpdateProfileInput extends PartialType(
   PickType(User, ['nickname', 'password', 'profileImage']),
 ) {}

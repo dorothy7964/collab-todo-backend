@@ -4,13 +4,16 @@ import {
   CreateAccountInput,
   CreateAccountOutput,
 } from './dtos/create-account.dto';
-import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { Role } from '@/auth/role.decorator';
 import { UserLookupInput, UserLookupOutput } from './dtos/user-search.dto';
+import {
+  UpdateProfileInput,
+  UpdateProfileOutput,
+} from './dtos/update-profile.dto';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -50,12 +53,12 @@ export class UserResolver {
     return this.userService.login(loginInput);
   }
 
-  @Mutation(() => EditProfileOutput)
+  @Mutation(() => UpdateProfileOutput)
   @Role(['Any'])
-  editProfile(
+  updateProfile(
     @AuthUser() authUser: User,
-    @Args('input') editProfileInput: EditProfileInput,
-  ): Promise<EditProfileOutput> {
-    return this.userService.editProfile(authUser.id, editProfileInput);
+    @Args('input') updateProfileInput: UpdateProfileInput,
+  ): Promise<UpdateProfileOutput> {
+    return this.userService.updateProfile(authUser.id, updateProfileInput);
   }
 }
