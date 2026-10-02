@@ -19,6 +19,10 @@ import {
   DeleteCategoryInput,
   DeleteCategoryOutput,
 } from './dtos/delete-category.dto';
+import {
+  GetCategoriesInput,
+  GetCategoriesOutput,
+} from './dtos/get-categories.dto';
 
 @Injectable()
 export class CategoryService {
@@ -105,6 +109,54 @@ export class CategoryService {
       return { ok: true, category };
     } catch {
       return { ok: false, error: '카테고리를 조회할 수 없습니다.' };
+    }
+  }
+
+  // 카테고리 목록 조회
+  async getCategories(
+    user: User,
+    getCategoriesInput: GetCategoriesInput,
+  ): Promise<GetCategoriesOutput> {
+    try {
+      const { groupId } = getCategoriesInput;
+
+      // 그룹 존재 여부 확인
+      const group = await this.groupService.getGroupById(groupId);
+
+      if (!group) {
+        return {
+          ok: false,
+          error: '존재하지 않는 그룹입니다.',
+        };
+      }
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.checkGroupMember(groupId, user.id);
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 카테고리를 조회할 수 있습니다.',
+        };
+      }
+
+      // 카테고리 목록조회
+      const categories = await this.category.find({
+        where: {
+          group: { id: groupId },
+        },
+        order: {
+          sortOrder: 'ASC',
+          id: 'ASC',
+        },
+      });
+
+      console.log('📢 [그룹.service.ts:155]', group);
+      console.log('📢 [카테고리.service.ts:154]', categories);
+
+      return { ok: true, categories };
+    } catch {
+      return { ok: false, error: '카테고리 목록을 조회할 수 없습니다.' };
     }
   }
 

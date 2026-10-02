@@ -16,6 +16,10 @@ import {
   DeleteCategoryInput,
   DeleteCategoryOutput,
 } from './dtos/delete-category.dto';
+import {
+  GetCategoriesInput,
+  GetCategoriesOutput,
+} from './dtos/get-categories.dto';
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -28,6 +32,15 @@ export class CategoryResolver {
     @Args('input') categoryInput: CategoryInput,
   ): Promise<CategoryOutput> {
     return this.categoryService.getCategory(authUser, categoryInput);
+  }
+
+  // 카테고리 목록조회
+  @Query(() => GetCategoriesOutput)
+  getCategories(
+    @AuthUser() authUser: User,
+    @Args('input') getCategoriesInput: GetCategoriesInput,
+  ): Promise<GetCategoriesOutput> {
+    return this.categoryService.getCategories(authUser, getCategoriesInput);
   }
 
   // 카테고리 생성
