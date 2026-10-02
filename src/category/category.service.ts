@@ -14,6 +14,7 @@ import {
   UpdateCategoryOutput,
 } from './dtos/update-category.dto';
 import { Category } from './entities/category.entity';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -57,6 +58,37 @@ export class CategoryService {
     );
 
     return !!groupMember;
+  }
+
+  // 카테고리 상세조회
+  async getCategory(
+    user: User,
+    categoryInput: CategoryInput,
+  ): Promise<CategoryOutput> {
+    try {
+      const { categoryId, groupId } = categoryInput;
+      const category = await this.category.findOne({
+        where: { id: categoryId, group: { id: groupId } },
+      });
+
+      if (!category) {
+        return { ok: false, error: '해당 카테고리를 조회할 수 없습니다.' };
+      }
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.checkGroupMember(groupId, user.id);
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 카테고리를 조회할 수 있습니다.',
+        };
+      }
+
+      return { ok: true, category };
+    } catch {
+      return { ok: false, error: '카테고리를 조회할 수 없습니다.' };
+    }
   }
 
   // 카테고리 생성

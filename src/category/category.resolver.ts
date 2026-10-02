@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthUser } from '@/auth/auth-user.decorator';
 import { User } from '@/user/entities/user.entity';
 import {
@@ -11,10 +11,20 @@ import {
   UpdateCategoryInput,
   UpdateCategoryOutput,
 } from './dtos/update-category.dto';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 
 @Resolver(() => Category)
 export class CategoryResolver {
   constructor(private readonly categoryService: CategoryService) {}
+
+  // 카테고리 상세조회
+  @Query(() => CategoryOutput)
+  category(
+    @AuthUser() authUser: User,
+    @Args('input') categoryInput: CategoryInput,
+  ): Promise<CategoryOutput> {
+    return this.categoryService.getCategory(authUser, categoryInput);
+  }
 
   // 카테고리 생성
   @Mutation(() => CreateCategoryOutput)
