@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { Todo } from './entities/todo.entity';
+import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 
 @Injectable()
 export class TodoService {
@@ -17,6 +18,59 @@ export class TodoService {
     private readonly userService: UserService,
   ) {}
 
+  // 할 일 상세 조회
+  async getTodo(
+    authUser: User,
+    getTodoInput: GetTodoInput,
+  ): Promise<GetTodoOutput> {
+    try {
+      const { todoId } = getTodoInput;
+
+      // 할 일 조회
+      const todo = await this.todo.findOne({
+        where: {
+          id: todoId,
+        },
+        relations: {
+          category: {
+            group: true,
+          },
+          author: true,
+          assignee: true,
+        },
+      });
+
+      if (!todo) {
+        return {
+          ok: false,
+          error: '할 일을 찾을 수 없습니다.',
+        };
+      }
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.categoryService.checkGroupMember(
+        todo.category.group.id,
+        authUser.id,
+      );
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 할 일을 조회할 수 있습니다.',
+        };
+      }
+
+      return {
+        ok: true,
+        todo,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '할 일 상세 조회에 실패했습니다.',
+      };
+    }
+  }
   // 할 일 생성
   async createTodo(
     authUser: User,

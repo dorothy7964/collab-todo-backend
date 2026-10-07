@@ -131,7 +131,7 @@ Todo
 
 <br/><br/>
 
-### 📋 할 일 목록 조회 (`getCategoryTodos`)
+### 📋 카테고리별 할 일 목록 조회 (`getCategoryTodos`)
 
 - ✅ 카테고리별 할 일 조회
 - ✅ 그룹 멤버 여부 확인
