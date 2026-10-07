@@ -151,9 +151,6 @@ export class CategoryService {
         },
       });
 
-      console.log('📢 [그룹.service.ts:155]', group);
-      console.log('📢 [카테고리.service.ts:154]', categories);
-
       return { ok: true, categories };
     } catch {
       return { ok: false, error: '카테고리 목록을 조회할 수 없습니다.' };

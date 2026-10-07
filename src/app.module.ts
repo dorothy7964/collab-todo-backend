@@ -22,6 +22,7 @@ import { UserModule } from './user/user.module';
 import { GroupMemberBan } from './group-member/entities/group-member-ban.entity';
 import { Category } from './category/entities/category.entity';
 import { CategoryModule } from './category/category.module';
+import { Todo } from './todo/entities/todo.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,7 +47,7 @@ import { CategoryModule } from './category/category.module';
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [User, Group, GroupMember, GroupMemberBan, Category],
+      entities: [User, Group, GroupMember, GroupMemberBan, Category, Todo],
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

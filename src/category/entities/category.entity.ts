@@ -1,8 +1,9 @@
 import { CoreEntity } from '@/common/entities/core.entity';
 import { Group } from '@/group/entities/group.entity';
+import { Todo } from '@/todo/entities/todo.entity';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsOptional, IsString } from 'class-validator';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 @InputType('CategoryInputType', { isAbstract: true })
 @ObjectType()
@@ -31,4 +32,7 @@ export class Category extends CoreEntity {
   @Column({ default: 0, nullable: true })
   @Field(() => Int, { nullable: true })
   sortOrder?: number;
+
+  @OneToMany(() => Todo, (todo) => todo.category)
+  todos: Todo[];
 }

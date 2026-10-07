@@ -1,6 +1,7 @@
 import { CoreEntity } from '@/common/entities/core.entity';
 import { GroupMember } from '@/group-member/entities/group-member.entity';
 import { Group } from '@/group/entities/group.entity';
+import { Todo } from '@/todo/entities/todo.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import {
   Field,
@@ -62,6 +63,10 @@ export class User extends CoreEntity {
 
   @OneToMany(() => GroupMember, (member) => member.user)
   groupMembers: GroupMember[];
+
+  // 담당한 Todo 목록
+  @OneToMany(() => Todo, (todo) => todo.assignee)
+  assignedTodos: Todo[];
 
   @BeforeInsert()
   @BeforeUpdate()
