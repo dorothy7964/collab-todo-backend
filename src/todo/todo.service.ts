@@ -79,6 +79,7 @@ export class TodoService {
       const newTodo = this.todo.create({
         ...todoData,
         assignee,
+        author: authUser,
         category,
       });
 

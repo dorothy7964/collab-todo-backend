@@ -122,6 +122,11 @@ export class Todo extends CoreEntity {
   @IsOptional()
   assignee?: User;
 
+  // 작성자
+  @ManyToOne(() => User)
+  @Field(() => User)
+  author: User;
+
   // 삭제일
   @DeleteDateColumn({ nullable: true })
   @Field(() => Date, { nullable: true })
