@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { Todo } from './entities/todo.entity';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
+import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
 
 @Injectable()
 export class TodoService {
@@ -148,6 +149,107 @@ export class TodoService {
       return {
         ok: false,
         error: '할 일 생성에 실패했습니다.',
+      };
+    }
+  }
+
+  // 할 일 수정
+  async updateTodo(
+    authUser: User,
+    updateTodoInput: UpdateTodoInput,
+  ): Promise<UpdateTodoOutput> {
+    try {
+      const { todoId, groupId, categoryId, assigneeId, ...updateData } =
+        updateTodoInput;
+
+      // 할 일 조회
+      const todo = await this.todo.findOne({
+        where: {
+          id: todoId,
+        },
+        relations: {
+          category: {
+            group: true,
+          },
+        },
+      });
+
+      if (!todo) {
+        return {
+          ok: false,
+          error: '할 일을 찾을 수 없습니다.',
+        };
+      }
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.categoryService.checkGroupMember(
+        todo.category.group.id,
+        authUser.id,
+      );
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 할 일을 수정할 수 있습니다.',
+        };
+      }
+
+      // 카테고리 수정
+      if (categoryId) {
+        const category = await this.categoryService.findCategoryById(
+          categoryId,
+          groupId,
+        );
+
+        if (!category) {
+          return {
+            ok: false,
+            error: '카테고리를 찾을 수 없습니다.',
+          };
+        }
+
+        todo.category = category;
+      }
+
+      // 담당자 수정
+      if (assigneeId) {
+        const assignee = await this.userService.findUserById(assigneeId);
+
+        if (!assignee) {
+          return {
+            ok: false,
+            error: '담당자를 찾을 수 없습니다.',
+          };
+        }
+
+        // 담당자 멤버 여부 확인
+        const isAssigneeMember = await this.categoryService.checkGroupMember(
+          groupId,
+          assignee.id,
+        );
+
+        if (!isAssigneeMember) {
+          return {
+            ok: false,
+            error: '담당자는 그룹 멤버만 지정할 수 있습니다.',
+          };
+        }
+
+        todo.assignee = assignee;
+      }
+
+      Object.assign(todo, updateData);
+      console.log('📢 [todo.service.ts:242]', todo);
+
+      await this.todo.save(todo);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '할 일을 수정할 수 없습니다.',
       };
     }
   }

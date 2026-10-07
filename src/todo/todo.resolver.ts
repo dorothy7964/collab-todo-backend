@@ -5,6 +5,7 @@ import { User } from '@/user/entities/user.entity';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { TodoService } from './todo.service';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
+import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
 
 @Resolver()
 export class TodoResolver {
@@ -25,5 +26,14 @@ export class TodoResolver {
     @AuthUser() authUser: User,
   ): Promise<CreateTodoOutput> {
     return this.todoService.createTodo(authUser, createTodoInput);
+  }
+
+  // 할 일 수정
+  @Mutation(() => UpdateTodoOutput)
+  updateTodo(
+    @AuthUser() authUser: User,
+    @Args('input') updateTodoInput: UpdateTodoInput,
+  ): Promise<UpdateTodoOutput> {
+    return this.todoService.updateTodo(authUser, updateTodoInput);
   }
 }
