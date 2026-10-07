@@ -56,7 +56,7 @@ export class CategoryService {
   }
 
   // 카테고리 존재 여부 및 그룹 소속 확인 (내부용)
-  private async findCategoryById(
+  async findCategoryById(
     categoryId: number,
     groupId: number,
   ): Promise<Category | null> {
@@ -69,10 +69,7 @@ export class CategoryService {
   }
 
   // 그룹 멤버 여부 확인 (내부용)
-  private async checkGroupMember(
-    groupId: number,
-    userId: number,
-  ): Promise<boolean> {
+  async checkGroupMember(groupId: number, userId: number): Promise<boolean> {
     const groupMember = await this.groupMemberService.findGroupMember(
       groupId,
       userId,

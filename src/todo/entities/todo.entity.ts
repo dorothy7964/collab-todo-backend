@@ -1,4 +1,9 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import {
+  Field,
+  InputType,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Column, DeleteDateColumn, Entity, ManyToOne } from 'typeorm';
 
@@ -44,6 +49,7 @@ registerEnumType(TodoPriority, {
   },
 });
 
+@InputType('TodoInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class Todo extends CoreEntity {

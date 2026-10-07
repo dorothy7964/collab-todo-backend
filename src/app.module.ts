@@ -23,6 +23,7 @@ import { GroupMemberBan } from './group-member/entities/group-member-ban.entity'
 import { Category } from './category/entities/category.entity';
 import { CategoryModule } from './category/category.module';
 import { Todo } from './todo/entities/todo.entity';
+import { TodoModule } from './todo/todo.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -66,6 +67,7 @@ import { Todo } from './todo/entities/todo.entity';
     }),
     AuthModule,
     CategoryModule,
+    TodoModule,
   ],
 })
 export class AppModule implements NestModule {

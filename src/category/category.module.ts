@@ -13,5 +13,6 @@ import { GroupMemberModule } from '@/group-member/group-member.module';
     GroupMemberModule,
   ],
   providers: [CategoryResolver, CategoryService],
+  exports: [CategoryService],
 })
 export class CategoryModule {}
