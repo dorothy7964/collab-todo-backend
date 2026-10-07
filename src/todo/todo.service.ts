@@ -1,11 +1,11 @@
+import { CategoryService } from '@/category/category.service';
+import { User } from '@/user/entities/user.entity';
+import { UserService } from '@/user/user.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CategoryService } from '@/category/category.service';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { Todo } from './entities/todo.entity';
-import { User } from '@/user/entities/user.entity';
-import { UserService } from '@/user/user.service';
 
 @Injectable()
 export class TodoService {
@@ -17,6 +17,7 @@ export class TodoService {
     private readonly userService: UserService,
   ) {}
 
+  // 할 일 생성
   async createTodo(
     authUser: User,
     createTodoInput: CreateTodoInput,

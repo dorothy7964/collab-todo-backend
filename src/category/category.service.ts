@@ -23,6 +23,10 @@ import {
   GetCategoriesInput,
   GetCategoriesOutput,
 } from './dtos/get-categories.dto';
+import {
+  GetCategoryTodosInput,
+  GetCategoryTodosOutput,
+} from './dtos/get-category-todos.dto';
 
 @Injectable()
 export class CategoryService {
@@ -151,6 +155,47 @@ export class CategoryService {
       return { ok: true, categories };
     } catch {
       return { ok: false, error: '카테고리 목록을 조회할 수 없습니다.' };
+    }
+  }
+
+  // 그룹 - 카테고리별 할 일 목록 조회
+  async getCategoryTodos(
+    authUser: User,
+    getCategoryTodosInput: GetCategoryTodosInput,
+  ): Promise<GetCategoryTodosOutput> {
+    try {
+      const { groupId } = getCategoryTodosInput;
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.checkGroupMember(groupId, authUser.id);
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 할 일 목록을 조회할 수 있습니다.',
+        };
+      }
+
+      const categories = await this.category.find({
+        where: {
+          group: {
+            id: groupId,
+          },
+        },
+        relations: {
+          todos: true,
+        },
+      });
+
+      return {
+        ok: true,
+        categories,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '할 일 목록 조회에 실패했습니다.',
+      };
     }
   }
 

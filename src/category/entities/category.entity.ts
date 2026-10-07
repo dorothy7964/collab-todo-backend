@@ -33,6 +33,7 @@ export class Category extends CoreEntity {
   @Field(() => Int, { nullable: true })
   sortOrder?: number;
 
+  @Field(() => [Todo])
   @OneToMany(() => Todo, (todo) => todo.category)
   todos: Todo[];
 }

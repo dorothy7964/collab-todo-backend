@@ -20,6 +20,10 @@ import {
   GetCategoriesInput,
   GetCategoriesOutput,
 } from './dtos/get-categories.dto';
+import {
+  GetCategoryTodosInput,
+  GetCategoryTodosOutput,
+} from './dtos/get-category-todos.dto';
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -41,6 +45,18 @@ export class CategoryResolver {
     @Args('input') getCategoriesInput: GetCategoriesInput,
   ): Promise<GetCategoriesOutput> {
     return this.categoryService.getCategories(authUser, getCategoriesInput);
+  }
+
+  // 그룹 - 카테고리별 할 일 목록 조회
+  @Query(() => GetCategoryTodosOutput)
+  getCategoryTodos(
+    @AuthUser() authUser: User,
+    @Args('input') getCategoryTodosInput: GetCategoryTodosInput,
+  ): Promise<GetCategoryTodosOutput> {
+    return this.categoryService.getCategoryTodos(
+      authUser,
+      getCategoryTodosInput,
+    );
   }
 
   // 카테고리 생성
