@@ -5,9 +5,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
-import { Todo } from './entities/todo.entity';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
+import { Todo } from './entities/todo.entity';
 
 @Injectable()
 export class TodoService {
@@ -27,7 +27,6 @@ export class TodoService {
     try {
       const { todoId } = getTodoInput;
 
-      // 할 일 조회
       const todo = await this.todo.findOne({
         where: {
           id: todoId,
@@ -48,7 +47,6 @@ export class TodoService {
         };
       }
 
-      // 그룹 멤버 여부 확인
       const isGroupMember = await this.categoryService.checkGroupMember(
         todo.category.group.id,
         authUser.id,
@@ -72,6 +70,7 @@ export class TodoService {
       };
     }
   }
+
   // 할 일 생성
   async createTodo(
     authUser: User,
@@ -92,7 +91,6 @@ export class TodoService {
         };
       }
 
-      // 그룹 멤버 여부 확인
       const isGroupMember = await this.categoryService.checkGroupMember(
         groupId,
         authUser.id,
@@ -105,20 +103,18 @@ export class TodoService {
         };
       }
 
-      // 담당자 조회
-      const assignee = assigneeId
-        ? await this.userService.findUserById(assigneeId)
-        : undefined;
+      let assignee: User | undefined;
 
-      if (assigneeId && !assignee) {
-        return {
-          ok: false,
-          error: '담당자를 찾을 수 없습니다.',
-        };
-      }
+      if (assigneeId) {
+        assignee = await this.userService.findUserById(assigneeId);
 
-      // 담당자 멤버 여부 확인
-      if (assignee) {
+        if (!assignee) {
+          return {
+            ok: false,
+            error: '담당자를 찾을 수 없습니다.',
+          };
+        }
+
         const isAssigneeMember = await this.categoryService.checkGroupMember(
           groupId,
           assignee.id,
@@ -134,8 +130,8 @@ export class TodoService {
 
       const newTodo = this.todo.create({
         ...todoData,
-        assignee,
         author: authUser,
+        assignee,
         category,
       });
 
@@ -159,10 +155,8 @@ export class TodoService {
     updateTodoInput: UpdateTodoInput,
   ): Promise<UpdateTodoOutput> {
     try {
-      const { todoId, groupId, categoryId, assigneeId, ...updateData } =
-        updateTodoInput;
+      const { todoId, categoryId, assigneeId, ...updateData } = updateTodoInput;
 
-      // 할 일 조회
       const todo = await this.todo.findOne({
         where: {
           id: todoId,
@@ -181,9 +175,11 @@ export class TodoService {
         };
       }
 
+      const todoGroupId = todo.category.group.id;
+
       // 그룹 멤버 여부 확인
       const isGroupMember = await this.categoryService.checkGroupMember(
-        todo.category.group.id,
+        todoGroupId,
         authUser.id,
       );
 
@@ -195,10 +191,10 @@ export class TodoService {
       }
 
       // 카테고리 수정
-      if (categoryId) {
+      if (categoryId !== undefined) {
         const category = await this.categoryService.findCategoryById(
           categoryId,
-          groupId,
+          todoGroupId,
         );
 
         if (!category) {
@@ -212,7 +208,7 @@ export class TodoService {
       }
 
       // 담당자 수정
-      if (assigneeId) {
+      if (assigneeId !== undefined) {
         const assignee = await this.userService.findUserById(assigneeId);
 
         if (!assignee) {
@@ -222,9 +218,8 @@ export class TodoService {
           };
         }
 
-        // 담당자 멤버 여부 확인
         const isAssigneeMember = await this.categoryService.checkGroupMember(
-          groupId,
+          todoGroupId,
           assignee.id,
         );
 
@@ -239,7 +234,6 @@ export class TodoService {
       }
 
       Object.assign(todo, updateData);
-      console.log('📢 [todo.service.ts:242]', todo);
 
       await this.todo.save(todo);
 
