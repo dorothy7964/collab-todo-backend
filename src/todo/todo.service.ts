@@ -5,6 +5,7 @@ import { CategoryService } from '@/category/category.service';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { Todo } from './entities/todo.entity';
 import { User } from '@/user/entities/user.entity';
+import { UserService } from '@/user/user.service';
 
 @Injectable()
 export class TodoService {
@@ -13,14 +14,15 @@ export class TodoService {
     private readonly todo: Repository<Todo>,
 
     private readonly categoryService: CategoryService,
+    private readonly userService: UserService,
   ) {}
 
   async createTodo(
-    user: User,
+    authUser: User,
     createTodoInput: CreateTodoInput,
   ): Promise<CreateTodoOutput> {
     try {
-      const { categoryId, groupId, ...todoData } = createTodoInput;
+      const { categoryId, groupId, assigneeId, ...todoData } = createTodoInput;
 
       const category = await this.categoryService.findCategoryById(
         categoryId,
@@ -37,19 +39,46 @@ export class TodoService {
       // 그룹 멤버 여부 확인
       const isGroupMember = await this.categoryService.checkGroupMember(
         groupId,
-        user.id,
+        authUser.id,
       );
-      console.log('📢 [todo.service.ts:42]', isGroupMember);
 
       if (!isGroupMember) {
         return {
           ok: false,
-          error: '그룹 멤버만 카테고리를 생성할 수 있습니다.',
+          error: '그룹 멤버만 할 일을 생성할 수 있습니다.',
         };
+      }
+
+      // 담당자 조회
+      const assignee = assigneeId
+        ? await this.userService.findUserById(assigneeId)
+        : undefined;
+
+      if (assigneeId && !assignee) {
+        return {
+          ok: false,
+          error: '담당자를 찾을 수 없습니다.',
+        };
+      }
+
+      // 담당자 멤버 여부 확인
+      if (assignee) {
+        const isAssigneeMember = await this.categoryService.checkGroupMember(
+          groupId,
+          assignee.id,
+        );
+
+        if (!isAssigneeMember) {
+          return {
+            ok: false,
+            error: '담당자는 그룹 멤버만 지정할 수 있습니다.',
+          };
+        }
       }
 
       const newTodo = this.todo.create({
         ...todoData,
+        assignee,
         category,
       });
 

@@ -19,6 +19,13 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
+  // 사용자 존재 여부 확인 (내부용)
+  async findUserById(userId: number): Promise<User | null> {
+    return this.user.findOne({
+      where: { id: userId },
+    });
+  }
+
   async createAccount({
     email,
     nickname,
