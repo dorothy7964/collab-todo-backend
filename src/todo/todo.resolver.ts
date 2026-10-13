@@ -10,6 +10,7 @@ import {
   UpdateTodoStatusInput,
   UpdateTodoStatusOutput,
 } from './dtos/update-todo-status.dto';
+import { DeleteTodoInput, DeleteTodoOutput } from './dtos/delete-todo-dto';
 
 @Resolver()
 export class TodoResolver {
@@ -51,5 +52,14 @@ export class TodoResolver {
       authUser,
       updateTodoStatusInput,
     );
+  }
+
+  // 카테고리 삭제 (Hard Delete)
+  @Mutation(() => DeleteTodoOutput)
+  deleteTodo(
+    @AuthUser() authUser: User,
+    @Args('input') deleteTodoInput: DeleteTodoInput,
+  ): Promise<DeleteTodoOutput> {
+    return this.todoService.deleteTodo(authUser, deleteTodoInput);
   }
 }

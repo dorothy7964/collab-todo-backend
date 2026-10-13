@@ -12,6 +12,7 @@ import {
   UpdateTodoStatusInput,
   UpdateTodoStatusOutput,
 } from './dtos/update-todo-status.dto';
+import { DeleteTodoInput, DeleteTodoOutput } from './dtos/delete-todo-dto';
 
 @Injectable()
 export class TodoService {
@@ -312,6 +313,74 @@ export class TodoService {
       return {
         ok: false,
         error: '할 일 상태를 변경할 수 없습니다.',
+      };
+    }
+  }
+
+  // 할 일 삭제
+  // deleteTodo() {
+  //   try {
+  //     return {
+  //       ok: true,
+  //     };
+  //   } catch {
+  //     return {
+  //       ok: false,
+  //       error: '삭제할 수 없습니다.',
+  //     };
+  //   }
+  // }
+
+  // 할 일 삭제
+  async deleteTodo(
+    authUser: User,
+    deleteTodoInput: DeleteTodoInput,
+  ): Promise<DeleteTodoOutput> {
+    try {
+      const { todoId } = deleteTodoInput;
+
+      const todo = await this.todo.findOne({
+        where: {
+          id: todoId,
+        },
+        relations: {
+          category: {
+            group: true,
+          },
+        },
+      });
+
+      if (!todo) {
+        return {
+          ok: false,
+          error: '할 일을 찾을 수 없습니다.',
+        };
+      }
+
+      const todoGroupId = todo.category.group.id;
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.categoryService.checkGroupMember(
+        todoGroupId,
+        authUser.id,
+      );
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 할 일을 수정할 수 있습니다.',
+        };
+      }
+
+      await this.todo.softRemove(todo);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '카테고리를 삭제할 수 없습니다.',
       };
     }
   }
