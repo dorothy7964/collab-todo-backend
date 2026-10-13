@@ -6,6 +6,10 @@ import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { TodoService } from './todo.service';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
+import {
+  UpdateTodoStatusInput,
+  UpdateTodoStatusOutput,
+} from './dtos/update-todo-status.dto';
 
 @Resolver()
 export class TodoResolver {
@@ -35,5 +39,17 @@ export class TodoResolver {
     @Args('input') updateTodoInput: UpdateTodoInput,
   ): Promise<UpdateTodoOutput> {
     return this.todoService.updateTodo(authUser, updateTodoInput);
+  }
+
+  // 할 일 상태 변경
+  @Mutation(() => UpdateTodoStatusOutput)
+  updaupdateTodoStatusteTodo(
+    @AuthUser() authUser: User,
+    @Args('input') updateTodoStatusInput: UpdateTodoStatusInput,
+  ): Promise<UpdateTodoStatusOutput> {
+    return this.todoService.updaupdateTodoStatusteTodo(
+      authUser,
+      updateTodoStatusInput,
+    );
   }
 }

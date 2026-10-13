@@ -8,6 +8,10 @@ import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
 import { Todo } from './entities/todo.entity';
+import {
+  UpdateTodoStatusInput,
+  UpdateTodoStatusOutput,
+} from './dtos/update-todo-status.dto';
 
 @Injectable()
 export class TodoService {
@@ -244,6 +248,70 @@ export class TodoService {
       return {
         ok: false,
         error: '할 일을 수정할 수 없습니다.',
+      };
+    }
+  }
+
+  // 할 일 상태 변경
+  async updaupdateTodoStatusteTodo(
+    authUser: User,
+    updateTodoStatusInput: UpdateTodoStatusInput,
+  ): Promise<UpdateTodoStatusOutput> {
+    try {
+      // 1. 할 일 존재 여부 확인
+      const { todoId, status } = updateTodoStatusInput;
+
+      const todo = await this.todo.findOne({
+        where: {
+          id: todoId,
+        },
+        relations: {
+          category: {
+            group: true,
+          },
+        },
+      });
+      if (!todo) {
+        return {
+          ok: false,
+          error: '할 일을 찾을 수 없습니다.',
+        };
+      }
+
+      const todoGroupId = todo.category.group.id;
+
+      // 2. 그룹 멤버 여부 확인
+      const isGroupMember = await this.categoryService.checkGroupMember(
+        todoGroupId,
+        authUser.id,
+      );
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 할 일을 수정할 수 있습니다.',
+        };
+      }
+
+      // 3. 동일한 상태라면 변경하지 않음
+      if (todo.status === status) {
+        return {
+          ok: false,
+          error: '변경사항이 없습니다.',
+        };
+      }
+
+      // 4. 상태 변경
+      todo.status = status;
+
+      await this.todo.save(todo);
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '할 일 상태를 변경할 수 없습니다.',
       };
     }
   }
