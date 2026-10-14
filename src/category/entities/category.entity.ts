@@ -3,7 +3,13 @@ import { Group } from '@/group/entities/group.entity';
 import { Todo } from '@/todo/entities/todo.entity';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsOptional, IsString } from 'class-validator';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @InputType('CategoryInputType', { isAbstract: true })
 @ObjectType()
@@ -36,4 +42,9 @@ export class Category extends CoreEntity {
   @Field(() => [Todo])
   @OneToMany(() => Todo, (todo) => todo.category)
   todos: Todo[];
+
+  // 삭제일
+  @DeleteDateColumn({ nullable: true })
+  @Field(() => Date, { nullable: true })
+  deletedAt?: Date;
 }

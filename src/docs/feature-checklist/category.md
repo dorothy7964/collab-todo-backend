@@ -34,41 +34,52 @@ Group
 
 ### Group — Soft Delete
 
-- 기존 데이터를 삭제하지 않고 `deletedAt`을 기록
-- 삭제된 그룹의 데이터 유지
+- 데이터를 물리적으로 삭제하지 않고 `deletedAt`을 기록
+- 그룹과 연결된 Category 및 Todo 데이터 유지
+- 삭제된 그룹의 하위 데이터는 일반 조회·수정 대상에서 제외
 - 필요할 경우 `restoreGroup()`을 통해 복구
+- 그룹 복구 시 하위 데이터의 기존 삭제 상태를 유지 (이전에 개별 삭제한 Category/Todo를 임의 복구하지 않음)
 
-### Category — Hard Delete
+### Category — Soft Delete
 
-- 카테고리를 데이터베이스에서 완전히 삭제
-- 별도의 카테고리 복구 기능은 제공하지 않음
-- 카테고리 삭제 시 연결된 Todo 데이터는 유지
-- Todo의 `category` 연결은 `NULL`로 변경
+- 카테고리를 DB에서 삭제하지 않고 `deletedAt` 기록
+- 연결된 Todo 데이터와 `categoryId` 관계 유지 (`NULL`로 변경하지 않음)
+- 일반 카테고리 목록 및 상세 조회에서 삭제된 카테고리 제외
+- 삭제된 카테고리에 속한 Todo는 일반 목록에서 제외하고, 수정·추가 작업을 제한
+- `restoreCategory()`를 통해 복구 가능 (상위 Group이 활성 상태인지 확인)
+- 카테고리 복구 시 Todo의 기존 삭제 상태는 그대로 유지
 
-### Todo — 데이터 유지
+### Todo — Soft Delete
 
-- 카테고리 삭제 시 Todo 자체는 삭제하지 않음
-- 카테고리와의 관계만 해제
-- 카테고리 없이도 Todo 데이터를 유지할 수 있도록 설계
+- Todo 삭제 시 `deletedAt` 기록
+- Category 삭제만으로 Todo 자체를 삭제하거나 연결 관계를 해제하지 않음
+- Category 복구 시 기존 Todo 관계를 그대로 사용
+- 개별 삭제된 Todo는 `restoreTodo()`로 별도 복구
 
 ```text
 카테고리 삭제 전
-Category
- └── Todo
-      └── categoryId: 20
+Category (id: 20, deletedAt: NULL)
+ └── Todo (categoryId: 20, deletedAt: NULL)
 
-          ↓ Hard Delete
+          ↓ Category Soft Delete
 
 카테고리 삭제 후
-Category: 삭제됨
+Category (id: 20, deletedAt: 삭제 시각)
+ └── Todo (categoryId: 20, deletedAt: NULL)  ← 데이터 및 관계 유지
 
-Todo
- └── categoryId: NULL
-      └── Todo 데이터 유지
+※ 일반 화면에서는 삭제된 Category와 소속 Todo를 표시하지 않음
+
+          ↓ restoreCategory()
+
+Category (id: 20, deletedAt: NULL)
+ └── Todo (categoryId: 20, deletedAt: NULL)
 ```
 
-- Todo와 Category의 관계에 `nullable: true` 설정
-- 외래 키 삭제 정책에 `onDelete: 'SET NULL'` 적용
+- Category Entity에 `@DeleteDateColumn()` 적용
+- Todo의 Category 관계는 기존 필수 관계를 유지할 수 있음 (`nullable: false`)
+- `onDelete: 'SET NULL'`은 사용하지 않음. 이는 물리 삭제 시의 외래 키 동작으로 Soft Delete에 필요하지 않음
+- TypeORM 일반 조회는 삭제된 Entity를 기본적으로 제외하며, 복구·관리 조회에는 `withDeleted: true` 사용
+- Todo 조회 시 상위 Category 및 Group의 삭제 여부도 검증 (Todo 자체의 `deletedAt`만으로는 상위 삭제 상태를 판별할 수 없음)
 
 <br/><br/>
 
@@ -82,6 +93,7 @@ Todo
 - ✅ 그룹 소속 여부 확인
 - ⬜ 그룹 멤버 권한 확인 (현재: 그룹 멤버면 생성 가능)
 - ✅ 중복 카테고리 이름 확인
+- ⬜ 삭제된 카테고리의 이름 중복 처리 정책 결정 (복구 시 충돌 고려)
 - ✅ 카테고리 생성 완료
 
 <br/>
@@ -93,6 +105,7 @@ Todo
 - ✅ 카테고리 색상 수정
 - ✅ 카테고리 순서 변경
 - ✅ 그룹 멤버 권한 확인
+- ⬜ 삭제된 카테고리 수정 방지
 - ✅ 카테고리 수정 완료
 
 <br/>
@@ -102,6 +115,7 @@ Todo
 - ✅ 카테고리 기본 정보 조회
 - ✅ 카테고리 소속 그룹 확인
 - ✅ 그룹 멤버 여부 확인
+- ⬜ 삭제된 카테고리 조회 제외
 - ⬜ 카테고리의 할 일 목록 조회
 - ⬜ 전체 할 일 개수 조회
 - ⬜ 완료된 할 일 개수 조회
@@ -114,16 +128,30 @@ Todo
 - ✅ 카테고리 존재 여부 확인
 - ✅ 그룹 소속 여부 확인
 - ✅ 그룹장만 삭제 권한 부여
-- ⬜ 카테고리 Hard Delete
-- ⬜ 연결된 Todo의 카테고리 관계 해제 (`NULL`)
-- ⬜ Todo 데이터 유지 확인
+- ⬜ 이미 삭제된 카테고리 여부 확인
+- ⬜ 카테고리 Soft Delete (`deletedAt` 기록)
+- ⬜ 연결된 Todo 및 `categoryId` 유지 확인
+- ⬜ 일반 조회에서 삭제된 카테고리와 소속 Todo 제외
 - ⬜ 카테고리 삭제 완료
+
+<br/>
+
+### ♻️ 카테고리 복구 (`restoreCategory`)
+
+- ⬜ 삭제된 카테고리 조회 (`withDeleted: true`)
+- ⬜ 그룹 소속 및 그룹장 권한 확인
+- ⬜ 상위 그룹의 활성 상태 확인
+- ⬜ 이름 중복 등 복구 충돌 확인
+- ⬜ 카테고리 복구 (`deletedAt` 초기화)
+- ⬜ 기존 Todo 관계 및 개별 삭제 상태 유지 확인
+- ⬜ 카테고리 복구 완료
 
 <br/>
 
 ### 📋 카테고리 목록 조회 (`getCategories`)
 
 - ✅ 그룹별 카테고리 조회
+- ⬜ 삭제된 카테고리 제외 확인
 - ⬜ 카테고리별 할 일 개수 조회
 - ⬜ 카테고리별 완료된 할 일 개수 조회
 - ⬜ 카테고리별 진행률 조회
@@ -135,7 +163,8 @@ Todo
 
 - ✅ 카테고리별 할 일 조회
 - ✅ 그룹 멤버 여부 확인
-- ⬜ 완료 / 미완료 할 일 조회
+- ⬜ 삭제된 Group/Category 접근 차단 및 삭제된 Todo 제외
+- ⬜ 상태별 할 일 조회 (`ON_HOLD`, `TODO`, `NEXT`, `IN_PROGRESS`, `COMPLETED`)
 - ⬜ 담당자별 할 일 조회
 - ⬜ 우선순위별 조회
 - ⬜ 마감일 기준 조회
@@ -155,6 +184,7 @@ Todo
 - ⬜ 카테고리 생성
 - ⬜ 카테고리 수정
 - ⬜ 카테고리 삭제
+- ⬜ 카테고리 복구
 - ⬜ 카테고리 순서 변경
 
 <br/><br/>
@@ -187,7 +217,7 @@ Todo
 
 ## 📊 카테고리 진행률 (추후 예정)
 
-카테고리별 Todo 완료 상태를 기준으로 진행률을 계산한다.
+활성 Category에 속한 삭제되지 않은 Todo의 완료 상태를 기준으로 진행률을 계산한다.
 
 ```text
 전체 Todo = 5
@@ -205,9 +235,9 @@ Todo
 기타       0 / 3 완료  ░░░░░░░░░░
 ```
 
-- ⬜ 전체 Todo 개수 조회
-- ⬜ 완료 Todo 개수 조회
-- ⬜ 진행률 계산
+- ⬜ 전체 Todo 개수 조회 (Soft Delete된 Todo 제외)
+- ⬜ 완료 Todo 개수 조회 (`COMPLETED`)
+- ⬜ 진행률 계산 (전체 Todo 0개일 때 처리 포함)
 - ⬜ 그룹 화면에서 카테고리별 진행률 표시
 
 <br/><br/>
@@ -225,7 +255,7 @@ Todo
 - ⬜ 카테고리 순서 저장
 - ⬜ 카테고리 순서 변경
 - ⬜ 드래그 앤 드롭 순서 변경 지원
-- ⬜ `sortOrder` 기준 조회
+- ⬜ `sortOrder` 기준 조회 (삭제된 카테고리 제외)
 
 <br/><br/>
 
@@ -242,9 +272,13 @@ Todo
 - ⬜ 카테고리 목록 조회
 - ⬜ 카테고리 상세 조회
 - ⬜ 카테고리 수정
-- ⬜ 카테고리 삭제
-- ⬜ 카테고리 삭제 시 Todo 유지 확인
-- ⬜ 카테고리 삭제 시 Todo의 `category` 연결 해제 확인
+- ⬜ 카테고리 Soft Delete 및 `deletedAt` 기록
+- ⬜ 삭제된 카테고리 일반 조회 제외
+- ⬜ 카테고리 삭제 시 Todo 데이터 및 `categoryId` 유지 확인
+- ⬜ 삭제된 카테고리의 Todo 일반 조회·수정 제한
+- ⬜ 카테고리 복구 및 Todo 관계 유지 확인
+- ⬜ 개별 Soft Delete된 Todo가 카테고리 복구로 자동 복구되지 않는지 확인
+- ⬜ 삭제된 그룹 소속 카테고리 복구 차단
 - ⬜ 카테고리 순서 변경
 
 <br/><br/>
@@ -260,3 +294,4 @@ Todo
 - ⬜ 카테고리별 통계
 - ⬜ 카테고리 템플릿
 - ⬜ 기본 카테고리 사용자 설정
+- ⬜ 삭제된 카테고리 관리 및 복구 UI

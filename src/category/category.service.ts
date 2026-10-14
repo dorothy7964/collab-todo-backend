@@ -351,8 +351,8 @@ export class CategoryService {
         };
       }
 
-      // 카테고리 Hard Delete
-      await this.category.remove(category);
+      // 카테고리 soft Delete
+      await this.category.softDelete(category);
 
       return {
         ok: true,
