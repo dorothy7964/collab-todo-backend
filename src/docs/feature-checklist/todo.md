@@ -50,8 +50,8 @@
 - ✅ 그룹 멤버 여부 확인
 - ✅ 해당 카테고리의 Todo 목록 조회
 - ✅ 최신 생성순 정렬
-- ⬜ 최신순 / 오래된순 정렬
-- ⬜ 우선순위별 정렬
+- ✅ 최신순 / 오래된순 정렬
+- ✅ 우선순위별 정렬
 - ⬜ 상태별 필터링
 - ⬜ 담당자별 필터링
 - ⬜ 마감일 기준 조회
@@ -103,6 +103,23 @@
 - `LOW` : 낮음
 - `MEDIUM` : 보통
 - `HIGH` : 높음
+
+<br/><br/>
+
+### 🔄 할 일 정렬 옵션 (`TodoSort`)
+
+| Enum             | 설명                 | 정렬 기준                  |
+| ---------------- | -------------------- | -------------------------- |
+| LATEST           | 최신 생성순 (기본값) | createdAt DESC             |
+| OLDEST           | 오래된 생성순        | createdAt ASC              |
+| PRIORITY_HIGH    | 높은 우선순위순      | HIGH → MEDIUM → LOW → NONE |
+| PRIORITY_LOW     | 낮은 우선순위순      | LOW → MEDIUM → HIGH → NONE |
+| RECENTLY_UPDATED | 최근 수정순          | updatedAt DESC             |
+
+- 기본 정렬은 `LATEST`로 설정
+- 우선순위 미설정(`NONE`)은 항상 마지막에 배치
+- 동일한 정렬값일 경우 `id DESC` 적용
+- 우선순위 정렬은 `CASE WHEN`을 사용하여 순서 지정
 
 <br/><br/>
 

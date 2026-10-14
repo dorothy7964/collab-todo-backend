@@ -11,6 +11,25 @@ import { Category } from '@/category/entities/category.entity';
 import { CoreEntity } from '@/common/entities/core.entity';
 import { User } from '@/user/entities/user.entity';
 
+export enum TodoSort {
+  LATEST = 'LATEST',
+  OLDEST = 'OLDEST',
+  PRIORITY_HIGH = 'PRIORITY_HIGH',
+  PRIORITY_LOW = 'PRIORITY_LOW',
+  RECENTLY_UPDATED = 'RECENTLY_UPDATED',
+}
+registerEnumType(TodoSort, {
+  name: 'TodoSort',
+  description: '할 일 정렬 기준',
+  valuesMap: {
+    LATEST: { description: '최신 생성순 (기본값)' },
+    OLDEST: { description: '오래된 생성순' },
+    PRIORITY_HIGH: { description: '높은 우선 순위순' },
+    PRIORITY_LOW: { description: '낮은 우선 순위순' },
+    RECENTLY_UPDATED: { description: '최근 수정순' },
+  },
+});
+
 export enum TodoStatus {
   ON_HOLD = 'ON_HOLD',
   NEXT = 'NEXT',
@@ -18,7 +37,6 @@ export enum TodoStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
 }
-
 registerEnumType(TodoStatus, {
   name: 'TodoStatus',
   description: '할 일 상태',
@@ -32,20 +50,20 @@ registerEnumType(TodoStatus, {
 });
 
 export enum TodoPriority {
-  NONE = 'NONE',
   HIGH = 'HIGH',
   MEDIUM = 'MEDIUM',
   LOW = 'LOW',
+  NONE = 'NONE',
 }
 
 registerEnumType(TodoPriority, {
   name: 'TodoPriority',
   description: '할 일 우선순위',
   valuesMap: {
-    NONE: { description: '설정 안 함' },
     HIGH: { description: '높음' },
     MEDIUM: { description: '보통' },
     LOW: { description: '낮음' },
+    NONE: { description: '설정 안 함' },
   },
 });
 
@@ -106,6 +124,13 @@ export class Todo extends CoreEntity {
   @Field(() => TodoPriority)
   @IsEnum(TodoPriority)
   priority: TodoPriority;
+
+  // 정렬
+  @Field(() => TodoSort, {
+    nullable: true,
+    defaultValue: TodoSort.LATEST,
+  })
+  sort?: TodoSort;
 
   // 카테고리
   @ManyToOne(() => Category, (category) => category.todos, {

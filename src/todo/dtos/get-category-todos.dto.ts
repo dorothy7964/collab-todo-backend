@@ -1,11 +1,17 @@
 import { CoreOutput } from '@/common/dtos/output.dto';
-import { Todo } from '@/todo/entities/todo.entity';
+import { Todo, TodoSort } from '@/todo/entities/todo.entity';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 @InputType()
 export class GetCategoryTodosInput {
   @Field(() => Int)
   categoryId: number;
+
+  @Field(() => TodoSort, {
+    nullable: true,
+    defaultValue: TodoSort.LATEST,
+  })
+  sort?: TodoSort;
 }
 
 @ObjectType()

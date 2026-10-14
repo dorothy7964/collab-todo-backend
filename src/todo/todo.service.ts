@@ -3,11 +3,11 @@ import { User } from '@/user/entities/user.entity';
 import { UserService } from '@/user/user.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
-import { Todo } from './entities/todo.entity';
+import { Todo, TodoSort } from './entities/todo.entity';
 import {
   UpdateTodoStatusInput,
   UpdateTodoStatusOutput,
@@ -27,6 +27,58 @@ export class TodoService {
     private readonly categoryService: CategoryService,
     private readonly userService: UserService,
   ) {}
+
+  // Todo 목록 정렬 공통 메서드
+  private applyTodoSort(
+    query: SelectQueryBuilder<Todo>,
+    sort: TodoSort,
+  ): SelectQueryBuilder<Todo> {
+    switch (sort) {
+      case TodoSort.LATEST:
+        query.orderBy('todo.createdAt', 'DESC');
+        break;
+
+      case TodoSort.OLDEST:
+        query.orderBy('todo.createdAt', 'ASC');
+        break;
+
+      case TodoSort.PRIORITY_HIGH:
+        query.orderBy(
+          `CASE todo.priority
+            WHEN 'HIGH' THEN 1
+            WHEN 'MEDIUM' THEN 2
+            WHEN 'LOW' THEN 3
+            WHEN 'NONE' THEN 4
+            ELSE 5
+          END`,
+          'ASC',
+        );
+        break;
+
+      case TodoSort.PRIORITY_LOW:
+        query.orderBy(
+          `CASE todo.priority
+            WHEN 'LOW' THEN 1
+            WHEN 'MEDIUM' THEN 2
+            WHEN 'HIGH' THEN 3
+            WHEN 'NONE' THEN 4
+            ELSE 5
+          END`,
+          'ASC',
+        );
+        break;
+
+      case TodoSort.RECENTLY_UPDATED:
+        query.orderBy('todo.updatedAt', 'DESC');
+        break;
+
+      default:
+        query.orderBy('todo.createdAt', 'DESC');
+        break;
+    }
+
+    return query.addOrderBy('todo.id', 'DESC');
+  }
 
   // 할 일 상세 조회
   async getTodo(
@@ -86,7 +138,7 @@ export class TodoService {
     getCategoryTodosInput: GetCategoryTodosInput,
   ): Promise<GetCategoryTodosOutput> {
     try {
-      const { categoryId } = getCategoryTodosInput;
+      const { categoryId, sort = TodoSort.LATEST } = getCategoryTodosInput;
 
       // 카테고리 존재 여부 및 소속 그룹 조회
       const category = await this.categoryService.findCategoryById(categoryId);
@@ -111,15 +163,17 @@ export class TodoService {
         };
       }
 
-      // 해당 카테고리의 Todo 목록 조회
-      const todos = await this.todo.find({
-        where: {
-          category: { id: categoryId },
-        },
-        order: {
-          createdAt: 'DESC',
-        },
-      });
+      // 조회 쿼리 생성
+
+      const query = this.todo
+        .createQueryBuilder('todo')
+        .where('todo.categoryId = :categoryId', { categoryId });
+
+      // 정렬 기준 적용
+      this.applyTodoSort(query, sort);
+
+      // 목록 조회
+      const todos = await query.getMany();
 
       return {
         ok: true,
