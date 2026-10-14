@@ -69,6 +69,9 @@ export class CategoryService {
         id: categoryId,
         group: { id: groupId },
       },
+      relations: {
+        group: true,
+      },
     });
   }
 
@@ -344,7 +347,7 @@ export class CategoryService {
         };
       }
 
-      if (owner.id !== groupId) {
+      if (owner.id !== category.group.ownerId) {
         return {
           ok: false,
           error: '그룹장만 그룹을 삭제할 수 있습니다.',
@@ -352,7 +355,7 @@ export class CategoryService {
       }
 
       // 카테고리 soft Delete
-      await this.category.softDelete(category);
+      await this.category.softRemove(category);
 
       return {
         ok: true,

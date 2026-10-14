@@ -78,7 +78,6 @@ export class GroupMemberService {
         getGroupMembersInput.groupId,
       );
 
-      console.log('📢 [group.service.ts:38]', groupMembers);
       return { ok: true, groupMembers };
     } catch {
       return {

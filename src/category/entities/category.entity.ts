@@ -44,7 +44,5 @@ export class Category extends CoreEntity {
   todos: Todo[];
 
   // 삭제일
-  @DeleteDateColumn({ nullable: true })
-  @Field(() => Date, { nullable: true })
-  deletedAt?: Date;
+  @DeleteDateColumn({ nullable: true }) deletedAt?: Date;
 }

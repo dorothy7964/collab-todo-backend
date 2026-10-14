@@ -129,10 +129,11 @@ Category (id: 20, deletedAt: NULL)
 - ✅ 그룹 소속 여부 확인
 - ✅ 그룹장만 삭제 권한 부여
 - ⬜ 이미 삭제된 카테고리 여부 확인
-- ⬜ 카테고리 Soft Delete (`deletedAt` 기록)
+- ✅ 카테고리 Soft Delete (`deletedAt` 기록)
 - ⬜ 연결된 Todo 및 `categoryId` 유지 확인
 - ⬜ 일반 조회에서 삭제된 카테고리와 소속 Todo 제외
 - ⬜ 카테고리 삭제 완료
+- ⬜ 카테고리 삭제 취소 : restore()
 
 <br/>
 

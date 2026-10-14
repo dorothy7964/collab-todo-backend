@@ -318,20 +318,6 @@ export class TodoService {
   }
 
   // 할 일 삭제
-  // deleteTodo() {
-  //   try {
-  //     return {
-  //       ok: true,
-  //     };
-  //   } catch {
-  //     return {
-  //       ok: false,
-  //       error: '삭제할 수 없습니다.',
-  //     };
-  //   }
-  // }
-
-  // 할 일 삭제
   async deleteTodo(
     authUser: User,
     deleteTodoInput: DeleteTodoInput,
