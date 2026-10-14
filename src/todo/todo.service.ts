@@ -17,6 +17,10 @@ import {
   GetCategoryTodosInput,
   GetCategoryTodosOutput,
 } from './dtos/get-category-todos.dto';
+import {
+  UpdateTodoPriorityInput,
+  UpdateTodoPriorityOutput,
+} from './dtos/update-todo-priority.dto';
 
 @Injectable()
 export class TodoService {
@@ -419,6 +423,68 @@ export class TodoService {
       return {
         ok: false,
         error: '할 일 상태를 변경할 수 없습니다.',
+      };
+    }
+  }
+
+  // 할 일 우선순위 변경
+
+  // 할 일 우선순위 변경
+  async updateTodoPriority(
+    authUser: User,
+    updateTodoPriorityInput: UpdateTodoPriorityInput,
+  ): Promise<UpdateTodoPriorityOutput> {
+    try {
+      const { todoId, priority } = updateTodoPriorityInput;
+
+      // 할 일 존재 여부 확인
+      const todo = await this.todo.findOne({
+        where: { id: todoId },
+        relations: {
+          category: {
+            group: true,
+          },
+        },
+      });
+
+      if (!todo) {
+        return {
+          ok: false,
+          error: '할 일을 찾을 수 없습니다.',
+        };
+      }
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.categoryService.checkGroupMember(
+        todo.category.group.id,
+        authUser.id,
+      );
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 할 일 우선순위를 변경할 수 있습니다.',
+        };
+      }
+
+      // 동일한 우선순위인지 확인
+      if (todo.priority === priority) {
+        return {
+          ok: false,
+          error: '변경사항이 없습니다.',
+        };
+      }
+
+      // 우선순위 변경
+      todo.priority = priority;
+
+      await this.todo.save(todo);
+
+      return { ok: true };
+    } catch {
+      return {
+        ok: false,
+        error: '할 일 우선순위를 변경할 수 없습니다.',
       };
     }
   }

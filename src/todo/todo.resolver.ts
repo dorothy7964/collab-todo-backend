@@ -15,6 +15,10 @@ import {
   GetCategoryTodosInput,
   GetCategoryTodosOutput,
 } from './dtos/get-category-todos.dto';
+import {
+  UpdateTodoPriorityInput,
+  UpdateTodoPriorityOutput,
+} from './dtos/update-todo-priority.dto';
 
 @Resolver()
 export class TodoResolver {
@@ -65,6 +69,15 @@ export class TodoResolver {
       authUser,
       updateTodoStatusInput,
     );
+  }
+
+  // 할 일 우선순위 변경
+  @Mutation(() => UpdateTodoPriorityOutput)
+  updateTodoPriority(
+    @AuthUser() authUser: User,
+    @Args('input') input: UpdateTodoPriorityInput,
+  ): Promise<UpdateTodoPriorityOutput> {
+    return this.todoService.updateTodoPriority(authUser, input);
   }
 
   // 카테고리 삭제 (Hard Delete)
