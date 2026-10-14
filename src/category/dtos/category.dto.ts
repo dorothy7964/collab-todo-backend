@@ -6,9 +6,6 @@ import { Category } from '../entities/category.entity';
 export class CategoryInput {
   @Field(() => Int)
   categoryId: number;
-
-  @Field(() => Int)
-  groupId: number;
 }
 
 @ObjectType()

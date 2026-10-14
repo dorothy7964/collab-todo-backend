@@ -13,6 +13,10 @@ import {
   UpdateTodoStatusOutput,
 } from './dtos/update-todo-status.dto';
 import { DeleteTodoInput, DeleteTodoOutput } from './dtos/delete-todo-dto';
+import {
+  GetCategoryTodosInput,
+  GetCategoryTodosOutput,
+} from './dtos/get-category-todos.dto';
 
 @Injectable()
 export class TodoService {
@@ -76,18 +80,68 @@ export class TodoService {
     }
   }
 
+  // 카테고리별 할 일 목록 조회
+  async getCategoryTodos(
+    authUser: User,
+    getCategoryTodosInput: GetCategoryTodosInput,
+  ): Promise<GetCategoryTodosOutput> {
+    try {
+      const { categoryId } = getCategoryTodosInput;
+
+      // 카테고리 존재 여부 및 소속 그룹 조회
+      const category = await this.categoryService.findCategoryById(categoryId);
+
+      if (!category) {
+        return {
+          ok: false,
+          error: '카테고리를 찾을 수 없습니다.',
+        };
+      }
+
+      // 그룹 멤버 여부 확인
+      const isGroupMember = await this.categoryService.checkGroupMember(
+        category.group.id,
+        authUser.id,
+      );
+
+      if (!isGroupMember) {
+        return {
+          ok: false,
+          error: '그룹 멤버만 할 일을 조회할 수 있습니다.',
+        };
+      }
+
+      // 해당 카테고리의 Todo 목록 조회
+      const todos = await this.todo.find({
+        where: {
+          category: { id: categoryId },
+        },
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+
+      return {
+        ok: true,
+        todos,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '할 일 목록 조회에 실패했습니다.',
+      };
+    }
+  }
+
   // 할 일 생성
   async createTodo(
     authUser: User,
     createTodoInput: CreateTodoInput,
   ): Promise<CreateTodoOutput> {
     try {
-      const { categoryId, groupId, assigneeId, ...todoData } = createTodoInput;
+      const { categoryId, assigneeId, ...todoData } = createTodoInput;
 
-      const category = await this.categoryService.findCategoryById(
-        categoryId,
-        groupId,
-      );
+      const category = await this.categoryService.findCategoryById(categoryId);
 
       if (!category) {
         return {
@@ -97,7 +151,7 @@ export class TodoService {
       }
 
       const isGroupMember = await this.categoryService.checkGroupMember(
-        groupId,
+        category.group.id,
         authUser.id,
       );
 
@@ -121,7 +175,7 @@ export class TodoService {
         }
 
         const isAssigneeMember = await this.categoryService.checkGroupMember(
-          groupId,
+          category.group.id,
           assignee.id,
         );
 
@@ -197,10 +251,8 @@ export class TodoService {
 
       // 카테고리 수정
       if (categoryId !== undefined) {
-        const category = await this.categoryService.findCategoryById(
-          categoryId,
-          todoGroupId,
-        );
+        const category =
+          await this.categoryService.findCategoryById(categoryId);
 
         if (!category) {
           return {

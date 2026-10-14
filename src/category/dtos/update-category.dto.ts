@@ -6,9 +6,6 @@ import { CreateCategoryInput } from './create-category.dto';
 export class UpdateCategoryInput extends PartialType(CreateCategoryInput) {
   @Field(() => Number)
   categoryId?: number;
-
-  @Field(() => Number)
-  groupId?: number;
 }
 
 @ObjectType()

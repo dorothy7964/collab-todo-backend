@@ -1,17 +1,12 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { AuthUser } from '@/auth/auth-user.decorator';
 import { User } from '@/user/entities/user.entity';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { CategoryService } from './category.service';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateCategoryInput,
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
-import { CategoryService } from './category.service';
-import { Category } from './entities/category.entity';
-import {
-  UpdateCategoryInput,
-  UpdateCategoryOutput,
-} from './dtos/update-category.dto';
-import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   DeleteCategoryInput,
   DeleteCategoryOutput,
@@ -21,9 +16,10 @@ import {
   GetCategoriesOutput,
 } from './dtos/get-categories.dto';
 import {
-  GetCategoryTodosInput,
-  GetCategoryTodosOutput,
-} from './dtos/get-category-todos.dto';
+  UpdateCategoryInput,
+  UpdateCategoryOutput,
+} from './dtos/update-category.dto';
+import { Category } from './entities/category.entity';
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -45,18 +41,6 @@ export class CategoryResolver {
     @Args('input') getCategoriesInput: GetCategoriesInput,
   ): Promise<GetCategoriesOutput> {
     return this.categoryService.getCategories(authUser, getCategoriesInput);
-  }
-
-  // 그룹 - 카테고리별 할 일 목록 조회
-  @Query(() => GetCategoryTodosOutput)
-  getCategoryTodos(
-    @AuthUser() authUser: User,
-    @Args('input') getCategoryTodosInput: GetCategoryTodosInput,
-  ): Promise<GetCategoryTodosOutput> {
-    return this.categoryService.getCategoryTodos(
-      authUser,
-      getCategoryTodosInput,
-    );
   }
 
   // 카테고리 생성

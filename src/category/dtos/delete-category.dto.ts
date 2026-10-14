@@ -5,9 +5,6 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 export class DeleteCategoryInput {
   @Field(() => Int)
   categoryId: number;
-
-  @Field(() => Int)
-  groupId: number;
 }
 
 @ObjectType()

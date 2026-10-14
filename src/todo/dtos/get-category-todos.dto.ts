@@ -1,15 +1,15 @@
 import { CoreOutput } from '@/common/dtos/output.dto';
+import { Todo } from '@/todo/entities/todo.entity';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
-import { Category } from '../entities/category.entity';
 
 @InputType()
 export class GetCategoryTodosInput {
   @Field(() => Int)
-  groupId: number;
+  categoryId: number;
 }
 
 @ObjectType()
 export class GetCategoryTodosOutput extends CoreOutput {
-  @Field(() => [Category], { nullable: true })
-  categories?: Category[];
+  @Field(() => [Todo], { nullable: true })
+  todos?: Todo[];
 }

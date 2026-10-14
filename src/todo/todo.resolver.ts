@@ -11,6 +11,10 @@ import {
   UpdateTodoStatusOutput,
 } from './dtos/update-todo-status.dto';
 import { DeleteTodoInput, DeleteTodoOutput } from './dtos/delete-todo-dto';
+import {
+  GetCategoryTodosInput,
+  GetCategoryTodosOutput,
+} from './dtos/get-category-todos.dto';
 
 @Resolver()
 export class TodoResolver {
@@ -22,6 +26,15 @@ export class TodoResolver {
     @Args('input') getTodoInput: GetTodoInput,
   ): Promise<GetTodoOutput> {
     return this.todoService.getTodo(authUser, getTodoInput);
+  }
+
+  // 그룹 - 카테고리별 할 일 목록 조회
+  @Query(() => GetCategoryTodosOutput)
+  getCategoryTodos(
+    @AuthUser() authUser: User,
+    @Args('input') getCategoryTodosInput: GetCategoryTodosInput,
+  ): Promise<GetCategoryTodosOutput> {
+    return this.todoService.getCategoryTodos(authUser, getCategoryTodosInput);
   }
 
   // 할 일 생성

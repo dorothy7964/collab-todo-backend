@@ -5,16 +5,11 @@ import { User } from '@/user/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   CreateCategoryInput,
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
-import {
-  UpdateCategoryInput,
-  UpdateCategoryOutput,
-} from './dtos/update-category.dto';
-import { Category } from './entities/category.entity';
-import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import {
   DeleteCategoryInput,
   DeleteCategoryOutput,
@@ -24,9 +19,10 @@ import {
   GetCategoriesOutput,
 } from './dtos/get-categories.dto';
 import {
-  GetCategoryTodosInput,
-  GetCategoryTodosOutput,
-} from './dtos/get-category-todos.dto';
+  UpdateCategoryInput,
+  UpdateCategoryOutput,
+} from './dtos/update-category.dto';
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoryService {
@@ -60,14 +56,10 @@ export class CategoryService {
   }
 
   // 카테고리 존재 여부 및 그룹 소속 확인 (내부용)
-  async findCategoryById(
-    categoryId: number,
-    groupId: number,
-  ): Promise<Category | null> {
+  async findCategoryById(categoryId: number): Promise<Category | null> {
     return this.category.findOne({
       where: {
         id: categoryId,
-        group: { id: groupId },
       },
       relations: {
         group: true,
@@ -91,17 +83,20 @@ export class CategoryService {
     categoryInput: CategoryInput,
   ): Promise<CategoryOutput> {
     try {
-      const { categoryId, groupId } = categoryInput;
+      const { categoryId } = categoryInput;
 
       // 카테고리 존재 여부 및 그룹 소속 확인
-      const category = await this.findCategoryById(categoryId, groupId);
+      const category = await this.findCategoryById(categoryId);
 
       if (!category) {
         return { ok: false, error: '해당 카테고리를 조회할 수 없습니다.' };
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.checkGroupMember(groupId, user.id);
+      const isGroupMember = await this.checkGroupMember(
+        category.group.id,
+        user.id,
+      );
 
       if (!isGroupMember) {
         return {
@@ -150,55 +145,13 @@ export class CategoryService {
           group: { id: groupId },
         },
         order: {
-          sortOrder: 'ASC',
-          id: 'ASC',
+          createdAt: 'DESC',
         },
       });
 
       return { ok: true, categories };
     } catch {
       return { ok: false, error: '카테고리 목록을 조회할 수 없습니다.' };
-    }
-  }
-
-  // 그룹 - 카테고리별 할 일 목록 조회
-  async getCategoryTodos(
-    authUser: User,
-    getCategoryTodosInput: GetCategoryTodosInput,
-  ): Promise<GetCategoryTodosOutput> {
-    try {
-      const { groupId } = getCategoryTodosInput;
-
-      // 그룹 멤버 여부 확인
-      const isGroupMember = await this.checkGroupMember(groupId, authUser.id);
-
-      if (!isGroupMember) {
-        return {
-          ok: false,
-          error: '그룹 멤버만 할 일 목록을 조회할 수 있습니다.',
-        };
-      }
-
-      const categories = await this.category.find({
-        where: {
-          group: {
-            id: groupId,
-          },
-        },
-        relations: {
-          todos: true,
-        },
-      });
-
-      return {
-        ok: true,
-        categories,
-      };
-    } catch {
-      return {
-        ok: false,
-        error: '할 일 목록 조회에 실패했습니다.',
-      };
     }
   }
 
@@ -273,10 +226,10 @@ export class CategoryService {
     updateCategoryInput: UpdateCategoryInput,
   ): Promise<UpdateCategoryOutput> {
     try {
-      const { groupId, categoryId, ...updateData } = updateCategoryInput;
+      const { categoryId, ...updateData } = updateCategoryInput;
 
       // 카테고리 존재 여부 및 그룹 소속 확인
-      const category = await this.findCategoryById(categoryId, groupId);
+      const category = await this.findCategoryById(categoryId);
 
       if (!category) {
         return {
@@ -286,7 +239,10 @@ export class CategoryService {
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.checkGroupMember(groupId, user.id);
+      const isGroupMember = await this.checkGroupMember(
+        category.group.id,
+        user.id,
+      );
 
       if (!isGroupMember) {
         return {
@@ -335,10 +291,10 @@ export class CategoryService {
     deleteCategoryInput: DeleteCategoryInput,
   ): Promise<DeleteCategoryOutput> {
     try {
-      const { categoryId, groupId } = deleteCategoryInput;
+      const { categoryId } = deleteCategoryInput;
 
       // 카테고리 존재 여부 및 그룹 소속 확인
-      const category = await this.findCategoryById(categoryId, groupId);
+      const category = await this.findCategoryById(categoryId);
 
       if (!category) {
         return {

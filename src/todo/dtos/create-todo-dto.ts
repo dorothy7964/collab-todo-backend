@@ -19,9 +19,6 @@ export class CreateTodoInput extends PickType(Todo, [
   'longitude',
 ]) {
   @Field(() => Int)
-  groupId: number;
-
-  @Field(() => Int)
   categoryId: number;
 
   @Field(() => Int, { nullable: true })
