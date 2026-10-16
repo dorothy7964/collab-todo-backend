@@ -7,7 +7,7 @@ import { Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
-import { Todo, TodoSort } from './entities/todo.entity';
+import { Todo, TodoSort, TodoStatus } from './entities/todo.entity';
 import {
   UpdateTodoStatusInput,
   UpdateTodoStatusOutput,
@@ -21,6 +21,10 @@ import {
   UpdateTodoPriorityInput,
   UpdateTodoPriorityOutput,
 } from './dtos/update-todo-priority.dto';
+import {
+  GetCompletedTodosInput,
+  GetCompletedTodosOutput,
+} from './dtos/get-completed-todos-dto';
 
 @Injectable()
 export class TodoService {
@@ -187,6 +191,52 @@ export class TodoService {
       return {
         ok: false,
         error: '할 일 목록 조회에 실패했습니다.',
+      };
+    }
+  }
+
+  // 카테고리별 완료된 할 일 조회
+  async getCompletedTodos(
+    getCompletedTodosInput: GetCompletedTodosInput,
+  ): Promise<GetCompletedTodosOutput> {
+    try {
+      const { categoryId } = getCompletedTodosInput;
+      const category = await this.categoryService.findCategoryById(categoryId);
+
+      if (!category) {
+        return {
+          ok: false,
+          error: '카테고리를 찾을 수 없습니다.',
+        };
+      }
+
+      const todos = await this.todo.find({
+        where: {
+          category: {
+            id: categoryId,
+          },
+          status: TodoStatus.COMPLETED,
+        },
+        order: {
+          updatedAt: 'DESC',
+        },
+      });
+
+      if (todos.length === 0) {
+        return {
+          ok: false,
+          error: '완료된 할 일이 없습니다.',
+        };
+      }
+
+      return {
+        ok: true,
+        todos,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '완료된 할 일을 조회할 수 없습니다.',
       };
     }
   }
@@ -426,8 +476,6 @@ export class TodoService {
       };
     }
   }
-
-  // 할 일 우선순위 변경
 
   // 할 일 우선순위 변경
   async updateTodoPriority(

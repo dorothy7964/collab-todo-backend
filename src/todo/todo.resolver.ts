@@ -19,6 +19,10 @@ import {
   UpdateTodoPriorityInput,
   UpdateTodoPriorityOutput,
 } from './dtos/update-todo-priority.dto';
+import {
+  GetCompletedTodosInput,
+  GetCompletedTodosOutput,
+} from './dtos/get-completed-todos-dto';
 
 @Resolver()
 export class TodoResolver {
@@ -32,13 +36,21 @@ export class TodoResolver {
     return this.todoService.getTodo(authUser, getTodoInput);
   }
 
-  // 그룹 - 카테고리별 할 일 목록 조회
+  // 카테고리별 할 일 목록 조회
   @Query(() => GetCategoryTodosOutput)
   getCategoryTodos(
     @AuthUser() authUser: User,
     @Args('input') getCategoryTodosInput: GetCategoryTodosInput,
   ): Promise<GetCategoryTodosOutput> {
     return this.todoService.getCategoryTodos(authUser, getCategoryTodosInput);
+  }
+
+  // 카테고리별 완료된 할 일 조회
+  @Query(() => GetCompletedTodosOutput)
+  getCompletedTodos(
+    @Args('input') getCompletedTodosInput: GetCompletedTodosInput,
+  ): Promise<GetCategoryTodosOutput> {
+    return this.todoService.getCompletedTodos(getCompletedTodosInput);
   }
 
   // 할 일 생성
