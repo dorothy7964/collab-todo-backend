@@ -3,7 +3,7 @@ import { User } from '@/user/entities/user.entity';
 import { UserService } from '@/user/user.service';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
 import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
@@ -25,6 +25,10 @@ import {
   GetCompletedTodosInput,
   GetCompletedTodosOutput,
 } from './dtos/get-completed-todos-dto';
+import {
+  GetTodosByCategoryInput,
+  GetTodosByCategoryOutput,
+} from './dtos/get-todos-by-category.dto';
 
 @Injectable()
 export class TodoService {
@@ -194,7 +198,51 @@ export class TodoService {
       };
     }
   }
+  // 카테고리별 해야 할 일 조회
+  async getTodosByCategory(
+    getTodosByCategoryInput: GetTodosByCategoryInput,
+  ): Promise<GetTodosByCategoryOutput> {
+    try {
+      const { categoryId } = getTodosByCategoryInput;
+      const category = await this.categoryService.findCategoryById(categoryId);
 
+      if (!category) {
+        return {
+          ok: false,
+          error: '카테고리를 찾을 수 없습니다.',
+        };
+      }
+
+      const todos = await this.todo.find({
+        where: {
+          category: {
+            id: categoryId,
+          },
+          status: Not(TodoStatus.COMPLETED),
+        },
+        order: {
+          updatedAt: 'DESC',
+        },
+      });
+
+      if (todos.length === 0) {
+        return {
+          ok: false,
+          error: '해야할 할 일이 없습니다.',
+        };
+      }
+
+      return {
+        ok: true,
+        todos,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '해야 할 일을 조회할 수 없습니다.',
+      };
+    }
+  }
   // 카테고리별 완료된 할 일 조회
   async getCompletedTodos(
     getCompletedTodosInput: GetCompletedTodosInput,

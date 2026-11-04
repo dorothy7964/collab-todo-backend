@@ -23,6 +23,10 @@ import {
   GetCompletedTodosInput,
   GetCompletedTodosOutput,
 } from './dtos/get-completed-todos-dto';
+import {
+  GetTodosByCategoryInput,
+  GetTodosByCategoryOutput,
+} from './dtos/get-todos-by-category.dto';
 
 @Resolver()
 export class TodoResolver {
@@ -43,6 +47,14 @@ export class TodoResolver {
     @Args('input') getCategoryTodosInput: GetCategoryTodosInput,
   ): Promise<GetCategoryTodosOutput> {
     return this.todoService.getCategoryTodos(authUser, getCategoryTodosInput);
+  }
+
+  // 카테고리별 해야 할 일 조회
+  @Query(() => GetTodosByCategoryOutput)
+  getTodosByCategory(
+    @Args('input') getTodosByCategoryInput: GetTodosByCategoryInput,
+  ): Promise<GetCategoryTodosOutput> {
+    return this.todoService.getTodosByCategory(getTodosByCategoryInput);
   }
 
   // 카테고리별 완료된 할 일 조회

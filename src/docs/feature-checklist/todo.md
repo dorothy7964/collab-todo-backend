@@ -57,11 +57,17 @@
 - ⬜ 마감일 기준 조회
 - ⬜ 페이지네이션
 
+### 📋 카테고리별 해야 할 일 조회 (`getTodosByCategory`)
+
+- ✅ 카테고리 ID로 할 일 조회
+- ✅ 완료되지 않은 할 일만 조회
+- ✅ 수정일 기준 내림차순 정렬 (updatedAt DESC)
+
 ### ✅ 카테고리별 완료된 할 일 조회 (`getCompletedTodos`)
 
 - ✅ 카테고리 ID로 할 일 조회
 - ✅ 완료 상태(`COMPLETED`)인 할 일만 조회
-- ✅ 최근 완료한 순서로 정렬
+- ✅ 수정일 기준 내림차순 정렬 (updatedAt DESC)
 
 ### ✏️ 할 일 수정 (`updateTodo`)
 
