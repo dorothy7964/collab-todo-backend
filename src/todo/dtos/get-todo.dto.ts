@@ -6,6 +6,7 @@ import { Todo } from '../entities/todo.entity';
 export class GetTodoInput {
   @Field(() => Int)
   todoId: number;
+  groupId: number;
 }
 
 @ObjectType()

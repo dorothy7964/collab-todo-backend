@@ -67,16 +67,6 @@ export class CategoryService {
     });
   }
 
-  // 그룹 멤버 여부 확인 (내부용)
-  async checkGroupMember(groupId: number, userId: number): Promise<boolean> {
-    const groupMember = await this.groupMemberService.findGroupMember(
-      groupId,
-      userId,
-    );
-
-    return !!groupMember;
-  }
-
   // 카테고리 상세조회
   async getCategory(
     user: User,
@@ -93,7 +83,7 @@ export class CategoryService {
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.checkGroupMember(
+      const isGroupMember = await this.groupMemberService.findGroupMember(
         category.group.id,
         user.id,
       );
@@ -130,8 +120,11 @@ export class CategoryService {
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.checkGroupMember(groupId, user.id);
-
+      const isGroupMember = await this.groupMemberService.findGroupMember(
+        group.id,
+        user.id,
+      );
+      console.log('📢 [category.service.ts:127]', isGroupMember);
       if (!isGroupMember) {
         return {
           ok: false,
@@ -175,8 +168,10 @@ export class CategoryService {
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.checkGroupMember(groupId, user.id);
-
+      const isGroupMember = await this.groupMemberService.findGroupMember(
+        group.id,
+        user.id,
+      );
       if (!isGroupMember) {
         return {
           ok: false,
@@ -226,7 +221,7 @@ export class CategoryService {
     updateCategoryInput: UpdateCategoryInput,
   ): Promise<UpdateCategoryOutput> {
     try {
-      const { categoryId, ...updateData } = updateCategoryInput;
+      const { categoryId, groupId, ...updateData } = updateCategoryInput;
 
       // 카테고리 존재 여부 및 그룹 소속 확인
       const category = await this.findCategoryById(categoryId);
@@ -239,8 +234,8 @@ export class CategoryService {
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.checkGroupMember(
-        category.group.id,
+      const isGroupMember = await this.groupMemberService.findGroupMember(
+        groupId,
         user.id,
       );
 

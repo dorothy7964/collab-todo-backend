@@ -5,6 +5,9 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 @InputType()
 export class GetCategoryTodosInput {
   @Field(() => Int)
+  groupId: number;
+
+  @Field(() => Int)
   categoryId: number;
 
   @Field(() => TodoSort, {

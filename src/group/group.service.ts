@@ -16,6 +16,7 @@ export class GroupService {
     private readonly group: Repository<Group>,
     private readonly groupMemberService: GroupMemberService,
   ) {}
+
   getAll(): Promise<Group[]> {
     return this.group.find();
   }

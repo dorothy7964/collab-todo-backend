@@ -29,6 +29,7 @@ import {
   GetTodosByCategoryInput,
   GetTodosByCategoryOutput,
 } from './dtos/get-todos-by-category.dto';
+import { GroupMemberService } from '@/group-member/group-member.service';
 
 @Injectable()
 export class TodoService {
@@ -38,6 +39,7 @@ export class TodoService {
 
     private readonly categoryService: CategoryService,
     private readonly userService: UserService,
+    private readonly groupMemberService: GroupMemberService,
   ) {}
 
   // Todo 목록 정렬 공통 메서드
@@ -98,7 +100,7 @@ export class TodoService {
     getTodoInput: GetTodoInput,
   ): Promise<GetTodoOutput> {
     try {
-      const { todoId } = getTodoInput;
+      const { todoId, groupId } = getTodoInput;
 
       const todo = await this.todo.findOne({
         where: {
@@ -120,11 +122,10 @@ export class TodoService {
         };
       }
 
-      const isGroupMember = await this.categoryService.checkGroupMember(
-        todo.category.group.id,
+      const isGroupMember = await this.groupMemberService.findGroupMember(
+        groupId,
         authUser.id,
       );
-
       if (!isGroupMember) {
         return {
           ok: false,
@@ -150,7 +151,11 @@ export class TodoService {
     getCategoryTodosInput: GetCategoryTodosInput,
   ): Promise<GetCategoryTodosOutput> {
     try {
-      const { categoryId, sort = TodoSort.LATEST } = getCategoryTodosInput;
+      const {
+        categoryId,
+        groupId,
+        sort = TodoSort.LATEST,
+      } = getCategoryTodosInput;
 
       // 카테고리 존재 여부 및 소속 그룹 조회
       const category = await this.categoryService.findCategoryById(categoryId);
@@ -163,8 +168,8 @@ export class TodoService {
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.categoryService.checkGroupMember(
-        category.group.id,
+      const isGroupMember = await this.groupMemberService.findGroupMember(
+        groupId,
         authUser.id,
       );
 
@@ -295,7 +300,7 @@ export class TodoService {
     createTodoInput: CreateTodoInput,
   ): Promise<CreateTodoOutput> {
     try {
-      const { categoryId, assigneeId, ...todoData } = createTodoInput;
+      const { categoryId, groupId, assigneeId, ...todoData } = createTodoInput;
 
       const category = await this.categoryService.findCategoryById(categoryId);
 
@@ -306,11 +311,10 @@ export class TodoService {
         };
       }
 
-      const isGroupMember = await this.categoryService.checkGroupMember(
-        category.group.id,
+      const isGroupMember = await this.groupMemberService.findGroupMember(
+        groupId,
         authUser.id,
       );
-
       if (!isGroupMember) {
         return {
           ok: false,
@@ -330,11 +334,10 @@ export class TodoService {
           };
         }
 
-        const isAssigneeMember = await this.categoryService.checkGroupMember(
-          category.group.id,
+        const isAssigneeMember = await this.groupMemberService.findGroupMember(
+          groupId,
           assignee.id,
         );
-
         if (!isAssigneeMember) {
           return {
             ok: false,
@@ -393,7 +396,7 @@ export class TodoService {
       const todoGroupId = todo.category.group.id;
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.categoryService.checkGroupMember(
+      const isGroupMember = await this.groupMemberService.findGroupMember(
         todoGroupId,
         authUser.id,
       );
@@ -431,7 +434,7 @@ export class TodoService {
           };
         }
 
-        const isAssigneeMember = await this.categoryService.checkGroupMember(
+        const isAssigneeMember = await this.groupMemberService.findGroupMember(
           todoGroupId,
           assignee.id,
         );
@@ -490,7 +493,7 @@ export class TodoService {
       const todoGroupId = todo.category.group.id;
 
       // 2. 그룹 멤버 여부 확인
-      const isGroupMember = await this.categoryService.checkGroupMember(
+      const isGroupMember = await this.groupMemberService.findGroupMember(
         todoGroupId,
         authUser.id,
       );
@@ -551,7 +554,7 @@ export class TodoService {
       }
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.categoryService.checkGroupMember(
+      const isGroupMember = await this.groupMemberService.findGroupMember(
         todo.category.group.id,
         authUser.id,
       );
@@ -614,7 +617,7 @@ export class TodoService {
       const todoGroupId = todo.category.group.id;
 
       // 그룹 멤버 여부 확인
-      const isGroupMember = await this.categoryService.checkGroupMember(
+      const isGroupMember = await this.groupMemberService.findGroupMember(
         todoGroupId,
         authUser.id,
       );
