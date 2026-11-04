@@ -3,29 +3,11 @@ import { GroupMember } from '@/group-member/entities/group-member.entity';
 import { Group } from '@/group/entities/group.entity';
 import { Todo } from '@/todo/entities/todo.entity';
 import { InternalServerErrorException } from '@nestjs/common';
-import {
-  Field,
-  InputType,
-  ObjectType,
-  registerEnumType,
-} from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import * as bcrypt from 'bcrypt';
 import { IsEnum, IsString } from 'class-validator';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
-
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-}
-
-registerEnumType(UserRole, {
-  name: 'UserRole',
-  description: '유저 타입',
-  valuesMap: {
-    ADMIN: { description: '관리자' },
-    USER: { description: '회원' },
-  },
-});
+import { UserRole } from '../enums/user-role.enum';
 
 @InputType('UserInputType', { isAbstract: true })
 @ObjectType()

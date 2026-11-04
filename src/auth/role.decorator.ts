@@ -1,4 +1,4 @@
-import { UserRole } from '@/user/entities/user.entity';
+import { UserRole } from '@/user/enums/user-role.enum';
 import { SetMetadata } from '@nestjs/common';
 
 // keyof typeof UserRole : UserRole enum의 키만 사용할 수 있다.
