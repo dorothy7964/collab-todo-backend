@@ -1,36 +1,50 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-
+import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from '@/auth/auth-user.decorator';
 import { User } from '@/user/entities/user.entity';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
-import { TodoService } from './todo.service';
-import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
-import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
-import {
-  UpdateTodoStatusInput,
-  UpdateTodoStatusOutput,
-} from './dtos/update-todo-status.dto';
 import { DeleteTodoInput, DeleteTodoOutput } from './dtos/delete-todo-dto';
 import {
   GetCategoryTodosInput,
   GetCategoryTodosOutput,
 } from './dtos/get-category-todos.dto';
 import {
-  UpdateTodoPriorityInput,
-  UpdateTodoPriorityOutput,
-} from './dtos/update-todo-priority.dto';
-import {
   GetCompletedTodosInput,
   GetCompletedTodosOutput,
 } from './dtos/get-completed-todos-dto';
+import { GetTodoInput, GetTodoOutput } from './dtos/get-todo.dto';
 import {
   GetTodosByCategoryInput,
   GetTodosByCategoryOutput,
 } from './dtos/get-todos-by-category.dto';
+import {
+  UpdateTodoPriorityInput,
+  UpdateTodoPriorityOutput,
+} from './dtos/update-todo-priority.dto';
+import {
+  UpdateTodoStatusInput,
+  UpdateTodoStatusOutput,
+} from './dtos/update-todo-status.dto';
+import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
+import { TodoService } from './todo.service';
+
+const pubsub = new PubSub();
 
 @Resolver()
 export class TodoResolver {
   constructor(private readonly todoService: TodoService) {}
+
+  @Mutation(() => Boolean)
+  async ReadyTest() {
+    await pubsub.publish('todoTestSub', { testSubscription: '구독 테스트 중' });
+    return true;
+  }
+
+  @Subscription(() => String)
+  testSubscription() {
+    return pubsub.asyncIterableIterator('todoTestSub');
+  }
+
   // 할 일 상세 조회
   @Query(() => GetTodoOutput)
   getTodo(

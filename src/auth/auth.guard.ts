@@ -15,6 +15,9 @@ export class AuthGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
+    const ctx = GqlExecutionContext.create(context); // GraphQL 컨텍스트로 변환
+    console.log('📢📢📢 [auth.guard.ts:19] ctx:', ctx);
+
     // 보통 target은 context.getHandler() 이다.
     const roles = this.reflector.get<AllowedRoles>(
       'roles',

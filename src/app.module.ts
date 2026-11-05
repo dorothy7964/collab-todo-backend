@@ -5,7 +5,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
@@ -24,6 +24,22 @@ import { Category } from './category/entities/category.entity';
 import { CategoryModule } from './category/category.module';
 import { Todo } from './todo/entities/todo.entity';
 import { TodoModule } from './todo/todo.module';
+
+type GraphQLWsContext = {
+  connectionParams?: Record<string, unknown>;
+  extra: {
+    token?: string;
+  };
+};
+
+type GraphQLContextOptions = {
+  req?: {
+    headers?: Record<string, string | string[] | undefined>;
+  };
+  extra?: {
+    token?: unknown;
+  };
+};
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,6 +53,7 @@ import { TodoModule } from './todo/todo.module';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_DATABASE: Joi.string().required(),
+        TOKEN_KEY: Joi.string(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -50,13 +67,66 @@ import { TodoModule } from './todo/todo.module';
       logging: true,
       entities: [User, Group, GroupMember, GroupMemberBan, Category, Todo],
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      // graphiql: true, // GraphQL Playground 유지보수 종료로 GraphiQL 사용
-      autoSchemaFile: true, // 파일을 직접 갖을 필요 없어서 변경
-      context: ({ req }: { req: Record<string, unknown> }) => ({
-        user: req['user'],
-      }),
+      imports: [ConfigModule],
+      inject: [ConfigService],
+
+      useFactory: (configService: ConfigService) => {
+        const TOKEN_KEY = configService.get<string>('TOKEN_KEY'); // 기본값 설정
+
+        return {
+          autoSchemaFile: true, // 스키마 자동 생성
+          cors: false, // CORS는 main.ts에서 처리
+
+          playground: process.env.NODE_ENV !== 'prod',
+          introspection: process.env.NODE_ENV !== 'prod',
+
+          subscriptions: {
+            // Playground는 graphql-ws를 지원하지 않으므로 Altair GraphQL 사용
+            'graphql-ws': {
+              /* WebSocket 연결이 시작되면 onConnect 실행 */
+              onConnect: (context: GraphQLWsContext) => {
+                const { connectionParams, extra } = context;
+                const token = connectionParams?.[TOKEN_KEY];
+
+                if (typeof token !== 'string' || !token) {
+                  console.log(
+                    `🚨 onConnect: connectionParams에 ${TOKEN_KEY}가 없음!`,
+                  );
+                  return;
+                }
+
+                // <WebSocket 연결 정보에 토큰 저장>
+                // extra는 graphql-ws의 연결 정보(웹소켓 자체 정보)를 저장하는 공간이다.
+                // graphql-ws에서는 connectionParams가 자동으로 context로 전달되지 않는다.
+                // 대신, extra 객체를 이용하여 웹소켓 연결 정보를 유지할 수 있다.
+                extra.token = token;
+              },
+            },
+          },
+
+          /* Query, Mutation, Subscription 요청 시 Context 생성 */
+          context: ({ req, extra }: GraphQLContextOptions) => {
+            const headerToken: unknown = req?.headers?.[TOKEN_KEY];
+            const wsToken: unknown = extra?.token;
+
+            const token =
+              (typeof headerToken === 'string' ? headerToken : null) ??
+              (typeof wsToken === 'string' ? wsToken : null);
+
+            if (!token) {
+              console.log(
+                `🚨 context: ${TOKEN_KEY}가 없음! 인증 문제 발생 가능`,
+              );
+            } else {
+              console.log(`✅ context: ${TOKEN_KEY} 정상 설정됨`);
+            }
+
+            return { token };
+          },
+        };
+      },
     }),
     GroupModule,
     GroupMemberModule,

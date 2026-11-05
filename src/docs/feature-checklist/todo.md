@@ -110,6 +110,53 @@
 
 <br/><br/>
 
+## 🔔 실시간 동기화 (GraphQL Subscriptions)
+
+- GraphQL Subscriptions를 활용한 Todo 실시간 업데이트
+- Todo 변경 사항을 구독 중인 그룹 멤버에게 전달
+- 그룹별 실시간 이벤트 분리
+- Todo 변경 시 별도의 새로고침 없이 데이터 동기화
+
+### 📡 Todo 실시간 구독 (`todoUpdated`)
+
+- ✅ GraphQL Subscription 설정
+- ✅Todo 이벤트 발행 (PubSub)
+- ✅ 그룹 ID 기반 이벤트 구독
+- ⬜ 그룹 멤버 여부 확인
+- ⬜ 구독자별 접근 권한 검증
+- ⬜ 그룹별 이벤트 격리
+- ⬜ 연결 종료 및 구독 해제 처리
+
+### 🔄 Todo 이벤트 종류
+
+- ⬜ Todo 생성 (`CREATED`)
+- ⬜ Todo 수정 (`UPDATED`)
+- ⬜ Todo 삭제 (`DELETED`)
+- ⬜ Todo 상태 변경 (`STATUS_CHANGED`)
+- ⬜ Todo 우선순위 변경 (`PRIORITY_CHANGED`)
+- ⬜ Todo 담당자 변경 (`ASSIGNEE_CHANGED`)
+- ⬜ Todo 카테고리 이동 (`MOVED`)
+
+### 🔐 Subscription 권한
+
+- ⬜ 로그인 사용자만 구독 가능
+- ⬜ 해당 그룹의 멤버만 구독 가능
+- ⬜ 그룹별 이벤트 접근 제한
+- ⬜ 그룹 멤버가 아닌 사용자의 구독 차단
+- ⬜ 그룹 탈퇴 또는 강퇴 시 구독 권한 제한
+
+### 🧪 Subscription 테스트
+
+- ⬜ 그룹 멤버 구독 성공
+- ⬜ 비회원 구독 차단
+- ⬜ 다른 그룹 이벤트 수신 차단
+- ⬜ Todo 생성 이벤트 수신
+- ⬜ Todo 수정 이벤트 수신
+- ⬜ Todo 삭제 이벤트 수신
+- ⬜ 상태 및 우선순위 변경 이벤트 수신
+- ⬜ 구독 연결 종료 테스트
+  <br/><br/>
+
 ## Todo 상태
 
 ### 진행 상태 (`TodoStatus`)
