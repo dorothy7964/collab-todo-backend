@@ -29,6 +29,7 @@ import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
 import { TodoService } from './todo.service';
 import { Inject } from '@nestjs/common';
 import { PUB_SUB } from '@/common/common.constants';
+import { Role } from '@/auth/role.decorator';
 
 @Resolver()
 export class TodoResolver {
@@ -37,18 +38,26 @@ export class TodoResolver {
     @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
+  /* 이벤트 발행*/
   // publish() : 지정한 이벤트 이름으로 데이터를 발행한다.
   @Mutation(() => Boolean)
-  async ReadyTest() {
+  async ReadyTest(@Args('subId') subId: number) {
     await this.pubSub.publish('todoTestSub', {
-      testSubscription: '구독 테스트 중',
+      testSubscription: subId,
     });
     return true;
   }
 
-  @Subscription(() => String)
-  testSubscription() {
+  /* 이벤트 구독*/
+  @Subscription(() => String, {
+    filter: ({ testSubscription }, { subId }) => {
+      return testSubscription === subId;
+    },
+  })
+  @Role(['Any'])
+  testSubscription(@Args('subId') subId: number) {
     // asyncIterator() : 지정한 이벤트를 구독하고 새로운 데이터가 발행되면 전달받는다.
+    console.log('📢 [todo.resolver.ts:63]', subId);
     return this.pubSub.asyncIterableIterator('todoTestSub');
   }
 

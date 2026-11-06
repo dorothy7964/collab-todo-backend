@@ -104,6 +104,7 @@ type GraphQLContextOptions = {
           context: ({ req, extra }: GraphQLContextOptions) => {
             const headerToken: unknown = req?.headers?.[TOKEN_KEY];
             const wsToken: unknown = extra?.token;
+            console.log('📢 [app.module.ts:107]', wsToken);
 
             const token =
               (typeof headerToken === 'string' ? headerToken : null) ??
