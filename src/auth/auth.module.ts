@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth.guard';
+import { UserModule } from '@/user/user.module';
 
 @Module({
+  imports: [UserModule],
   providers: [
     {
       provide: APP_GUARD, // APP_GUARD : Guard를 전역(Global) 으로 등록하기 위한 토큰

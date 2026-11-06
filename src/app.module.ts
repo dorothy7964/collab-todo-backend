@@ -1,29 +1,23 @@
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
+import { CategoryModule } from './category/category.module';
+import { Category } from './category/entities/category.entity';
 import { CommonModule } from './common/common.module';
+import { GroupMemberBan } from './group-member/entities/group-member-ban.entity';
 import { GroupMember } from './group-member/entities/group-member.entity';
 import { GroupMemberModule } from './group-member/group-member.module';
 import { Group } from './group/entities/group.entity';
 import { GroupModule } from './group/group.module';
-import { JwtMiddleware } from './jwt/jwt.middleware';
 import { JwtModule } from './jwt/jwt.module';
-import { User } from './user/entities/user.entity';
-import { UserModule } from './user/user.module';
-import { GroupMemberBan } from './group-member/entities/group-member-ban.entity';
-import { Category } from './category/entities/category.entity';
-import { CategoryModule } from './category/category.module';
 import { Todo } from './todo/entities/todo.entity';
 import { TodoModule } from './todo/todo.module';
+import { User } from './user/entities/user.entity';
+import { UserModule } from './user/user.module';
 
 type GraphQLWsContext = {
   connectionParams?: Record<string, unknown>;
@@ -140,11 +134,4 @@ type GraphQLContextOptions = {
     TodoModule,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes({
-      path: '/graphql',
-      method: RequestMethod.POST,
-    });
-  }
-}
+export class AppModule {}
