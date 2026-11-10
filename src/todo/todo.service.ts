@@ -1,7 +1,7 @@
 import { CategoryService } from '@/category/category.service';
 import { User } from '@/user/entities/user.entity';
 import { UserService } from '@/user/user.service';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { CreateTodoInput, CreateTodoOutput } from './dtos/create-todo-dto';
@@ -30,13 +30,15 @@ import {
   GetTodosByCategoryOutput,
 } from './dtos/get-todos-by-category.dto';
 import { GroupMemberService } from '@/group-member/group-member.service';
+import { PubSub } from 'graphql-subscriptions';
+import { PUB_SUB } from '@/common/pubsub.constants';
 
 @Injectable()
 export class TodoService {
   constructor(
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
     @InjectRepository(Todo)
     private readonly todo: Repository<Todo>,
-
     private readonly categoryService: CategoryService,
     private readonly userService: UserService,
     private readonly groupMemberService: GroupMemberService,
@@ -465,14 +467,13 @@ export class TodoService {
   }
 
   // 할 일 상태 변경
-  async updaupdateTodoStatusteTodo(
+  async updateTodoStatus(
     authUser: User,
     updateTodoStatusInput: UpdateTodoStatusInput,
   ): Promise<UpdateTodoStatusOutput> {
     try {
       // 1. 할 일 존재 여부 확인
       const { todoId, status } = updateTodoStatusInput;
-
       const todo = await this.todo.findOne({
         where: {
           id: todoId,
@@ -483,21 +484,32 @@ export class TodoService {
           },
         },
       });
+      console.log('📢 [todo.service.ts:567]- 1 투두 조회완료', todo);
+
       if (!todo) {
+        console.log('📢 [todo.service.ts:569] 2. 투두없음');
+
         return {
           ok: false,
           error: '할 일을 찾을 수 없습니다.',
         };
       }
+      console.log('📢 [todo.service.ts:575] 3.투두데이터');
 
       const todoGroupId = todo.category.group.id;
+      console.log('📢. 그룹 ID', todoGroupId);
+      console.log('📢. 사용자', authUser);
+      console.log('📢. 사용자 ID', authUser.id);
 
       // 2. 그룹 멤버 여부 확인
       const isGroupMember = await this.groupMemberService.findGroupMember(
         todoGroupId,
         authUser.id,
       );
+      console.log('📢 [todo.service.ts:581] 4. 투두 카테고리', todo.category);
+      console.log('📢 [todo.service.ts:581] 5. 그룹', todo.category.group.id);
 
+      console.log('📢 [todo.service.ts:581] 6. 유저', authUser.id);
       if (!isGroupMember) {
         return {
           ok: false,
@@ -517,10 +529,22 @@ export class TodoService {
       todo.status = status;
 
       await this.todo.save(todo);
+
+      // 5. 상태 변경 이벤트 발생
+      await this.pubSub.publish('todoStatusUpdated', {
+        // Subscription 필드 이름과 일치해야 한다.
+        todoStatusUpdated: {
+          todoId: todo.id,
+          status: todo.status,
+          groupId: todoGroupId,
+        },
+      });
       return {
         ok: true,
       };
-    } catch {
+    } catch (e) {
+      console.log('📢 [todo.service.ts:608]', e);
+
       return {
         ok: false,
         error: '할 일 상태를 변경할 수 없습니다.',

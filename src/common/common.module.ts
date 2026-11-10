@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 import { PubSub } from 'graphql-subscriptions';
-import { PUB_SUB } from './common.constants';
+import { PUB_SUB } from './pubsub.constants';
 
 // Common 모듈에서 애플리케이션 전체에서 사용할 PubSub을 제공한다.
 // 모듈이 생성될 때 useValue를 사용해 new PubSub() 인스턴스를 생성하고,

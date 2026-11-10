@@ -1,4 +1,11 @@
-import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
+import {
+  Args,
+  Int,
+  Mutation,
+  Query,
+  Resolver,
+  Subscription,
+} from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { AuthUser } from '@/auth/auth-user.decorator';
 import { User } from '@/user/entities/user.entity';
@@ -28,10 +35,12 @@ import {
 import { UpdateTodoInput, UpdateTodoOutput } from './dtos/update-todo.dto';
 import { TodoService } from './todo.service';
 import { Inject } from '@nestjs/common';
-import { PUB_SUB } from '@/common/common.constants';
+import { PUB_SUB } from '@/common/pubsub.constants';
 import { Role } from '@/auth/role.decorator';
+import { Todo } from './entities/todo.entity';
+import { TodoStatusUpdatedSubscription } from './dtos/sub-update-todo-status.dto';
 
-@Resolver()
+@Resolver(() => Todo)
 export class TodoResolver {
   constructor(
     private readonly todoService: TodoService,
@@ -61,7 +70,27 @@ export class TodoResolver {
     return this.pubSub.asyncIterableIterator('todoTestSub');
   }
 
+  /* 할일 상태 구독 */
+  @Subscription(() => TodoStatusUpdatedSubscription, {
+    filter: (
+      payload: { todoStatusUpdated: TodoStatusUpdatedSubscription },
+      variables: { groupId: number },
+    ) => {
+      return payload.todoStatusUpdated.groupId === variables.groupId;
+    },
+    resolve: (payload: {
+      todoStatusUpdated: TodoStatusUpdatedSubscription;
+    }) => {
+      return payload.todoStatusUpdated;
+    },
+  })
+  todoStatusUpdated(@Args('groupId', { type: () => Int }) groupId: number) {
+    console.log('📢 [todo.resolver.ts:88]', groupId);
+    return this.pubSub.asyncIterableIterator('todoStatusUpdated');
+  }
+
   // 할 일 상세 조회
+  @Role(['Any'])
   @Query(() => GetTodoOutput)
   getTodo(
     @AuthUser() authUser: User,
@@ -71,6 +100,7 @@ export class TodoResolver {
   }
 
   // 카테고리별 할 일 목록 조회
+  @Role(['Any'])
   @Query(() => GetCategoryTodosOutput)
   getCategoryTodos(
     @AuthUser() authUser: User,
@@ -80,6 +110,7 @@ export class TodoResolver {
   }
 
   // 카테고리별 해야 할 일 조회
+  @Role(['Any'])
   @Query(() => GetTodosByCategoryOutput)
   getTodosByCategory(
     @Args('input') getTodosByCategoryInput: GetTodosByCategoryInput,
@@ -88,6 +119,7 @@ export class TodoResolver {
   }
 
   // 카테고리별 완료된 할 일 조회
+  @Role(['Any'])
   @Query(() => GetCompletedTodosOutput)
   getCompletedTodos(
     @Args('input') getCompletedTodosInput: GetCompletedTodosInput,
@@ -96,6 +128,7 @@ export class TodoResolver {
   }
 
   // 할 일 생성
+  @Role(['USER'])
   @Mutation(() => CreateTodoOutput)
   createTodo(
     @Args('input') createTodoInput: CreateTodoInput,
@@ -105,6 +138,7 @@ export class TodoResolver {
   }
 
   // 할 일 수정
+  @Role(['USER'])
   @Mutation(() => UpdateTodoOutput)
   updateTodo(
     @AuthUser() authUser: User,
@@ -114,18 +148,19 @@ export class TodoResolver {
   }
 
   // 할 일 상태 변경
+  @Role(['USER'])
   @Mutation(() => UpdateTodoStatusOutput)
-  updaupdateTodoStatusteTodo(
+  updateTodoStatus(
     @AuthUser() authUser: User,
     @Args('input') updateTodoStatusInput: UpdateTodoStatusInput,
   ): Promise<UpdateTodoStatusOutput> {
-    return this.todoService.updaupdateTodoStatusteTodo(
-      authUser,
-      updateTodoStatusInput,
-    );
+    console.log('📢 [todo.resolver.ts:168]', authUser);
+
+    return this.todoService.updateTodoStatus(authUser, updateTodoStatusInput);
   }
 
   // 할 일 우선순위 변경
+  @Role(['USER'])
   @Mutation(() => UpdateTodoPriorityOutput)
   updateTodoPriority(
     @AuthUser() authUser: User,
@@ -135,6 +170,7 @@ export class TodoResolver {
   }
 
   // 카테고리 삭제 (Hard Delete)
+  @Role(['USER'])
   @Mutation(() => DeleteTodoOutput)
   deleteTodo(
     @AuthUser() authUser: User,
