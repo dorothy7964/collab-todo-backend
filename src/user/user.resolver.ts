@@ -20,13 +20,13 @@ export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
   @Query(() => User)
-  @Role(['Any'])
+  @Role(['USER'])
   me(@AuthUser() authUser: User) {
     return authUser;
   }
 
-  @Query(() => UserProfileOutput)
   @Role(['Any'])
+  @Query(() => UserProfileOutput)
   userProfile(
     @Args() userProfileInput: UserProfileInput,
   ): Promise<UserProfileOutput> {
@@ -54,7 +54,7 @@ export class UserResolver {
   }
 
   @Mutation(() => UpdateProfileOutput)
-  @Role(['Any'])
+  @Role(['USER'])
   updateProfile(
     @AuthUser() authUser: User,
     @Args('input') updateProfileInput: UpdateProfileInput,

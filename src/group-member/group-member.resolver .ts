@@ -32,6 +32,7 @@ export class GroupMemberResolver {
   constructor(private readonly groupMemberService: GroupMemberService) {}
 
   // 멤버 목록 조회
+  @Role(['Any'])
   @Query(() => GetGroupMembersOutput)
   getGroupMembers(
     @Args('input') getGroupMembersInput: GetGroupMembersInput,
@@ -40,8 +41,8 @@ export class GroupMemberResolver {
   }
 
   // 그룹 멤버 추가
+  @Role(['USER'])
   @Mutation(() => CreateGroupMemberOutput)
-  @Role(['Any'])
   async createGroupMember(
     @AuthUser() authUser: User,
     @Args('input') createGroupMemberInput: CreateGroupMemberInput,
@@ -53,6 +54,7 @@ export class GroupMemberResolver {
   }
 
   // 그룹 멤버 초대 (권한: 그룹장)
+  @Role(['USER'])
   @Mutation(() => InviteGroupMemberOutput)
   async inviteGroupMember(
     @AuthUser() authUser: User,
@@ -65,6 +67,7 @@ export class GroupMemberResolver {
   }
 
   // 그룹 내보내기 (권한: 그룹장)
+  @Role(['USER'])
   @Mutation(() => RemoveGroupMemberOutput)
   async removeGroupMember(
     @AuthUser() authUser: User,
@@ -77,6 +80,7 @@ export class GroupMemberResolver {
   }
 
   // 그룹 멤버 재가입 허용
+  @Role(['USER'])
   @Mutation(() => UnbanGroupMemberOutput)
   async unbanGroupMember(
     @AuthUser() authUser: User,
@@ -89,6 +93,7 @@ export class GroupMemberResolver {
   }
 
   // 그룹 나가기
+  @Role(['USER'])
   @Mutation(() => LeaveGroupOutput)
   async leaveGroup(
     @AuthUser() authUser: User,

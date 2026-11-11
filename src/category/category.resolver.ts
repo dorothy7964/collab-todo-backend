@@ -20,6 +20,7 @@ import {
   UpdateCategoryOutput,
 } from './dtos/update-category.dto';
 import { Category } from './entities/category.entity';
+import { Role } from '@/auth/role.decorator';
 
 @Resolver(() => Category)
 export class CategoryResolver {
@@ -44,6 +45,7 @@ export class CategoryResolver {
   }
 
   // 카테고리 생성
+  @Role(['USER'])
   @Mutation(() => CreateCategoryOutput)
   async createCategory(
     @AuthUser() authUser: User,

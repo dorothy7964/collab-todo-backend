@@ -26,6 +26,7 @@ export class GroupResolver {
   }
 
   // 내가 속한 그룹 보기
+  @Role(['USER'])
   @Query(() => MyGroupsOutput)
   myGroups(@AuthUser() owner: User): Promise<MyGroupsOutput> {
     return this.groupService.getMyGroups(owner);
@@ -33,7 +34,7 @@ export class GroupResolver {
 
   // 그룹 생성
   @Mutation(() => CreateGroupOutput)
-  @Role(['Any'])
+  @Role(['USER'])
   async createGroup(
     @AuthUser() authUser: User,
     @Args('input') createGroupInput: CreateGroupInput,
@@ -42,6 +43,7 @@ export class GroupResolver {
   }
 
   // 그룹 수정
+  @Role(['USER'])
   @Mutation(() => UpdateGroupOutput)
   async updateGroup(
     @AuthUser() authUser: User,
@@ -51,6 +53,7 @@ export class GroupResolver {
   }
 
   // 그룹 삭제
+  @Role(['USER'])
   @Mutation(() => DeleteGroupOutput)
   async deleteGroup(
     @AuthUser() authUser: User,
