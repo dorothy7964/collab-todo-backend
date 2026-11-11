@@ -168,6 +168,14 @@ export class TodoService {
           error: '카테고리를 찾을 수 없습니다.',
         };
       }
+      // 카테고리의 그룹 소속 여부 확인
+      const isCategoryInGroup = category?.group.id === groupId;
+      if (!isCategoryInGroup) {
+        return {
+          ok: false,
+          error: '해당 그룹의 카테고리에서만 할 일을 조회할 수 있습니다.',
+        };
+      }
 
       // 그룹 멤버 여부 확인
       const isGroupMember = await this.groupMemberService.findGroupMember(
@@ -310,6 +318,19 @@ export class TodoService {
         return {
           ok: false,
           error: '카테고리를 찾을 수 없습니다.',
+        };
+      }
+
+      const isCategoryInGroup = category?.group.id === groupId;
+      console.log(
+        '📢 [todo.service.ts:325] 카테고리 그룹아이디',
+        category?.group.id,
+      );
+      console.log('📢 [todo.service.ts:326] 작성한', groupId);
+      if (!isCategoryInGroup) {
+        return {
+          ok: false,
+          error: '해당 그룹의 카테고리에서만 할 일을 생성할 수 있습니다.',
         };
       }
 
