@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { IsEnum, IsString } from 'class-validator';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
+import { PersonalCategory } from '@/personal-category/entities/personal-category.entity';
 
 @InputType('UserInputType', { isAbstract: true })
 @ObjectType()
@@ -49,6 +50,13 @@ export class User extends CoreEntity {
   // 담당한 Todo 목록
   @OneToMany(() => Todo, (todo) => todo.assignee)
   assignedTodos: Todo[];
+
+  // 사용자의 개인 카테고리 목록
+  @OneToMany(
+    () => PersonalCategory,
+    (personalCategory) => personalCategory.user,
+  )
+  personalCategories: PersonalCategory[];
 
   @BeforeInsert()
   @BeforeUpdate()

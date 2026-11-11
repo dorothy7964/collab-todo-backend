@@ -129,10 +129,10 @@
 
 ### 🔄 Todo 이벤트 종류
 
-- ⬜ Todo 생성 (`CREATED`)
+- ✅ Todo 생성 (`CREATED`)
 - ⬜ Todo 수정 (`UPDATED`)
 - ⬜ Todo 삭제 (`DELETED`)
-- ⬜ Todo 상태 변경 (`STATUS_CHANGED`)
+- ✅ Todo 상태 변경 (`STATUS_CHANGED`)
 - ⬜ Todo 우선순위 변경 (`PRIORITY_CHANGED`)
 - ⬜ Todo 담당자 변경 (`ASSIGNEE_CHANGED`)
 - ⬜ Todo 카테고리 이동 (`MOVED`)

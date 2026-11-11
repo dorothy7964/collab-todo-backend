@@ -10,6 +10,7 @@ import { Column, DeleteDateColumn, Entity, ManyToOne } from 'typeorm';
 import { Category } from '@/category/entities/category.entity';
 import { CoreEntity } from '@/common/entities/core.entity';
 import { User } from '@/user/entities/user.entity';
+import { PersonalCategory } from '@/personal-category/entities/personal-category.entity';
 
 export enum TodoSort {
   LATEST = 'LATEST',
@@ -132,12 +133,21 @@ export class Todo extends CoreEntity {
   })
   sort?: TodoSort;
 
-  // 카테고리
+  // 그룹 카테고리
   @ManyToOne(() => Category, (category) => category.todos, {
-    nullable: false,
+    nullable: true,
   })
-  @Field(() => Category)
-  category: Category;
+  @Field(() => Category, { nullable: true })
+  category?: Category;
+
+  // 개인 카테고리
+  @ManyToOne(
+    () => PersonalCategory,
+    (personalCategory) => personalCategory.todos,
+    { nullable: true },
+  )
+  @Field(() => PersonalCategory, { nullable: true })
+  personalCategory?: PersonalCategory;
 
   // 담당자
   @ManyToOne(() => User, {

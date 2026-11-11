@@ -28,6 +28,33 @@ Group
       └── Todo
 ```
 
+### 그룹 / 카테고리 분류
+
+```text
+src/
+├── category/                 # 그룹 카테고리
+│   ├── dtos/
+│   ├── entities/
+│   │   └── category.entity.ts
+│   ├── category.module.ts
+│   ├── category.resolver.ts
+│   └── category.service.ts
+│
+├── personal-category/        # 개인 카테고리
+│   ├── dtos/
+│   ├── entities/
+│   │   └── personal-category.entity.ts
+│   ├── personal-category.module.ts
+│   ├── personal-category.resolver.ts
+│   └── personal-category.service.ts
+│
+└── todo/
+    ├── entities/
+    │   └── todo.entity.ts
+    ├── todo.resolver.ts
+    └── todo.service.ts
+```
+
 <br/><br/>
 
 ## 🗑️ 삭제 정책
@@ -171,6 +198,28 @@ Category (id: 20, deletedAt: NULL)
 - ⬜ 마감일 기준 조회
 - ⬜ 정렬
 - ⬜ 페이지네이션
+
+<br/><br/>
+
+### 개인 카테고리 분리
+
+- ✅ 개인 카테고리 생성
+- ⬜ 개인 카테고리 수정
+- ⬜ 개인 카테고리 삭제
+- ⬜ 개인 카테고리 복구
+- ⬜ 개인 카테고리 순서 변경
+
+### 개인 할 일
+
+- ⬜ 개인 할 일 생성
+- ⬜ 개인 할 일 조회
+- ⬜ 개인 할 일 수정
+- ⬜ 개인 할 일 삭제
+- ⬜ 개인 할 일 복구
+- ⬜ 개인 할 일 상태 변경
+- ⬜ 개인 할 일 우선순위 변경
+
+<br/><br/>
 
 ## 👥 카테고리 권한 (추후 예정)
 

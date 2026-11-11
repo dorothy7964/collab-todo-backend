@@ -31,6 +31,7 @@ export class Category extends CoreEntity {
   @IsString()
   color?: string;
 
+  // 그룹 카테고리
   @Field(() => Group)
   @ManyToOne(() => Group, (group) => group.categories)
   group: Group;

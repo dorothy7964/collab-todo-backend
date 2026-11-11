@@ -18,6 +18,8 @@ import { Todo } from './todo/entities/todo.entity';
 import { TodoModule } from './todo/todo.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { PersonalCategoryModule } from './personal-category/personal-category.module';
+import { PersonalCategory } from './personal-category/entities/personal-category.entity';
 
 type GraphQLWsContext = {
   connectionParams?: Record<string, unknown>;
@@ -59,7 +61,15 @@ type GraphQLContextOptions = {
       database: process.env.DB_DATABASE,
       synchronize: process.env.NODE_ENV !== 'prod',
       logging: true,
-      entities: [User, Group, GroupMember, GroupMemberBan, Category, Todo],
+      entities: [
+        User,
+        Group,
+        GroupMember,
+        GroupMemberBan,
+        Category,
+        PersonalCategory,
+        Todo,
+      ],
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
@@ -131,6 +141,7 @@ type GraphQLContextOptions = {
     }),
     AuthModule,
     CategoryModule,
+    PersonalCategoryModule,
     TodoModule,
   ],
 })
