@@ -39,6 +39,7 @@ import { PUB_SUB } from '@/common/pubsub.constants';
 import { Role } from '@/auth/role.decorator';
 import { Todo } from './entities/todo.entity';
 import { TodoStatusUpdatedSubscription } from './dtos/sub-update-todo-status.dto';
+import { TodoCreatedSubscription } from './dtos/sub-create-todo-status.dto';
 
 @Resolver(() => Todo)
 export class TodoResolver {
@@ -57,7 +58,6 @@ export class TodoResolver {
     return true;
   }
 
-  /* 이벤트 구독*/
   @Subscription(() => String, {
     filter: ({ testSubscription }, { subId }) => {
       return testSubscription === subId;
@@ -70,7 +70,7 @@ export class TodoResolver {
     return this.pubSub.asyncIterableIterator('todoTestSub');
   }
 
-  /* 할일 상태 구독 */
+  /* 할일 상태 이벤트 구독*/
   @Subscription(() => TodoStatusUpdatedSubscription, {
     filter: (
       payload: { todoStatusUpdated: TodoStatusUpdatedSubscription },
@@ -85,8 +85,28 @@ export class TodoResolver {
     },
   })
   todoStatusUpdated(@Args('groupId', { type: () => Int }) groupId: number) {
-    console.log('📢 [todo.resolver.ts:88]', groupId);
+    console.log('📢 [todo.resolver.ts:todoStatusUpdated groupId]', groupId);
     return this.pubSub.asyncIterableIterator('todoStatusUpdated');
+  }
+
+  /* 할일 생성 이벤트 구독*/
+  @Subscription(() => TodoCreatedSubscription, {
+    filter: (
+      payload: { todoCreated: TodoCreatedSubscription },
+      variables: { groupId: number },
+    ) => {
+      console.log('📢 [todo.resolver.ts:98]todoCreated', payload.todoCreated);
+      console.log('📢 [todo.resolver.ts:98]todoCreated', variables.groupId);
+      return payload.todoCreated.groupId === variables.groupId;
+    },
+    resolve: (payload: { todoCreated: TodoCreatedSubscription }) => {
+      return payload.todoCreated;
+    },
+  })
+  @Role(['Any'])
+  todoCreated(@Args('groupId') groupId: number) {
+    console.log('📢 [todo.resolver.ts:todoCreated groupId]', groupId);
+    return this.pubSub.asyncIterableIterator('todoCreated');
   }
 
   // 할 일 상세 조회

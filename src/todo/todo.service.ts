@@ -322,11 +322,6 @@ export class TodoService {
       }
 
       const isCategoryInGroup = category?.group.id === groupId;
-      console.log(
-        '📢 [todo.service.ts:325] 카테고리 그룹아이디',
-        category?.group.id,
-      );
-      console.log('📢 [todo.service.ts:326] 작성한', groupId);
       if (!isCategoryInGroup) {
         return {
           ok: false,
@@ -377,6 +372,16 @@ export class TodoService {
       });
 
       const todo = await this.todo.save(newTodo);
+
+      // 할 일 생성 이벤트 발생
+      await this.pubSub.publish('todoCreated', {
+        // filter의 payload에는 다음 데이터가 전달
+        todoCreated: {
+          groupId,
+          todoId: todo.id,
+          categoryId: todo.category.id,
+        },
+      });
 
       return {
         ok: true,
@@ -505,32 +510,22 @@ export class TodoService {
           },
         },
       });
-      console.log('📢 [todo.service.ts:567]- 1 투두 조회완료', todo);
 
       if (!todo) {
-        console.log('📢 [todo.service.ts:569] 2. 투두없음');
-
         return {
           ok: false,
           error: '할 일을 찾을 수 없습니다.',
         };
       }
-      console.log('📢 [todo.service.ts:575] 3.투두데이터');
 
       const todoGroupId = todo.category.group.id;
-      console.log('📢. 그룹 ID', todoGroupId);
-      console.log('📢. 사용자', authUser);
-      console.log('📢. 사용자 ID', authUser.id);
 
       // 2. 그룹 멤버 여부 확인
       const isGroupMember = await this.groupMemberService.findGroupMember(
         todoGroupId,
         authUser.id,
       );
-      console.log('📢 [todo.service.ts:581] 4. 투두 카테고리', todo.category);
-      console.log('📢 [todo.service.ts:581] 5. 그룹', todo.category.group.id);
 
-      console.log('📢 [todo.service.ts:581] 6. 유저', authUser.id);
       if (!isGroupMember) {
         return {
           ok: false,
