@@ -8,6 +8,10 @@ import {
   CreatePersonalCategoryOutput,
 } from './dtos/create-personal-category.dto';
 import { GetPersonalCategoriesOutput } from './dtos/get-personal-categories.dto';
+import {
+  GetPersonalCategoryInput,
+  GetPersonalCategoryOutput,
+} from './dtos/get-personal-category.dto';
 
 @Injectable()
 export class PersonalCategoryService {
@@ -27,12 +31,27 @@ export class PersonalCategoryService {
     });
   }
 
-  // 개인 해당 카테고리 목록 조회
+  // 개인 해당 카테고리 목록 조회 (내부용)
   async findPersonalCategories(
     userId: number,
   ): Promise<PersonalCategory[] | null> {
     return this.personalCategory.find({
       where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+  }
+
+  // 개인 해당 카테고리 조회 (내부용)
+  async findPersonalCategory(
+    categoryId: number,
+    userId: number,
+  ): Promise<PersonalCategory | null> {
+    return this.personalCategory.findOne({
+      where: {
+        id: categoryId,
         user: {
           id: userId,
         },
@@ -110,7 +129,6 @@ export class PersonalCategoryService {
   ): Promise<GetPersonalCategoriesOutput> {
     try {
       const personalCategories = await this.findPersonalCategories(user.id);
-      console.log('📢 [personal-category.service.ts:117]', personalCategories);
       if (!personalCategories || personalCategories.length === 0) {
         return {
           ok: false,
@@ -129,15 +147,29 @@ export class PersonalCategoryService {
 
   // 개인 카테고리 단일 조회
   async getPersonalCategory(
-    id: number,
-    userId: number,
-  ): Promise<PersonalCategory | null> {
-    return this.personalCategory.findOne({
-      where: {
-        id,
-        user: { id: userId },
-      },
-    });
+    user: User,
+    getPersonalCategoryInput: GetPersonalCategoryInput,
+  ): Promise<GetPersonalCategoryOutput> {
+    try {
+      const { categoryId } = getPersonalCategoryInput;
+      const personalCategory = await this.findPersonalCategory(
+        user.id,
+        categoryId,
+      );
+      if (!personalCategory) {
+        return {
+          ok: false,
+          error: '해당 개인 케테고리 목록이 없습니다',
+        };
+      }
+
+      return {
+        ok: true,
+        personalCategory,
+      };
+    } catch {
+      return { ok: false, error: '카테고리 목록을 조회할 수 없습니다.' };
+    }
   }
 
   // 개인 카테고리 수정

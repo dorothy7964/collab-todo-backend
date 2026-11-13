@@ -9,6 +9,10 @@ import {
   CreatePersonalCategoryOutput,
 } from './dtos/create-personal-category.dto';
 import { GetPersonalCategoriesOutput } from './dtos/get-personal-categories.dto';
+import {
+  GetPersonalCategoryInput,
+  GetPersonalCategoryOutput,
+} from './dtos/get-personal-category.dto';
 
 @Resolver(() => PersonalCategory)
 export class PersonalCategoryResolver {
@@ -39,12 +43,16 @@ export class PersonalCategoryResolver {
   }
 
   // 개인 카테고리 단일 조회
-  @Query(() => PersonalCategory, { nullable: true })
-  getPersonalCategory(
-    @AuthUser() user: User,
-    @Args('id') id: number,
-  ): Promise<PersonalCategory | null> {
-    return this.personalCategoryService.getPersonalCategory(id, user.id);
+  @Role(['USER'])
+  @Query(() => GetPersonalCategoryOutput)
+  async getPersonalCategory(
+    @AuthUser() authUser: User,
+    @Args('input') getPersonalCategoryInput: GetPersonalCategoryInput,
+  ): Promise<GetPersonalCategoryOutput> {
+    return this.personalCategoryService.getPersonalCategory(
+      authUser,
+      getPersonalCategoryInput,
+    );
   }
 
   // 개인 카테고리 수정
