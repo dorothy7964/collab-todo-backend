@@ -17,6 +17,10 @@ import {
   UpdatePersonalCategoryInput,
   UpdatePersonalCategoryOutput,
 } from './dtos/update-personal-category.dto';
+import {
+  DeletePersonalCategoryInput,
+  DeletePersonalCategoryOutput,
+} from './dtos/delete-personal-category.dto';
 
 @Resolver(() => PersonalCategory)
 export class PersonalCategoryResolver {
@@ -73,13 +77,15 @@ export class PersonalCategoryResolver {
   }
 
   // 개인 카테고리 삭제
-  // @Mutation(() => Boolean)
-  // async deletePersonalCategory(
-  //   @AuthUser() user: User,
-  //   @Args('id') id: number,
-  // ): Promise<boolean> {
-  //   await this.personalCategoryService.deletePersonalCategory(id, user.id);
-
-  //   return true;
-  // }
+  @Role(['USER'])
+  @Mutation(() => DeletePersonalCategoryOutput)
+  async deletePersonalCategory(
+    @AuthUser() authUser: User,
+    @Args('input') deletePersonalCategoryInput: DeletePersonalCategoryInput,
+  ): Promise<DeletePersonalCategoryOutput> {
+    return this.personalCategoryService.deletePersonalCategory(
+      authUser,
+      deletePersonalCategoryInput,
+    );
+  }
 }

@@ -16,6 +16,10 @@ import {
   UpdatePersonalCategoryInput,
   UpdatePersonalCategoryOutput,
 } from './dtos/update-personal-category.dto';
+import {
+  DeletePersonalCategoryInput,
+  DeletePersonalCategoryOutput,
+} from './dtos/delete-personal-category.dto';
 
 @Injectable()
 export class PersonalCategoryService {
@@ -228,11 +232,38 @@ export class PersonalCategoryService {
     }
   }
 
-  // // 개인 카테고리 삭제
-  // async deletePersonalCategory(id: number, userId: number): Promise<void> {
-  //   await this.personalCategory.softDelete({
-  //     id,
-  //     user: { id: userId },
-  //   });
-  // }
+  // 개인 카테고리 삭제
+  async deletePersonalCategory(
+    user: User,
+    deletePersonalCategoryInput: DeletePersonalCategoryInput,
+  ): Promise<DeletePersonalCategoryOutput> {
+    try {
+      const { categoryId } = deletePersonalCategoryInput;
+
+      // 카테고리 존재 여부
+      const personalCategory = await this.findPersonalCategory(
+        user.id,
+        categoryId,
+      );
+
+      if (!personalCategory) {
+        return {
+          ok: false,
+          error: '해당 카테고리가 존재하지 않습니다.',
+        };
+      }
+
+      // 카테고리 soft Delete
+      await this.personalCategory.softRemove(personalCategory);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: false,
+        error: '카테고리를 삭제할 수 없습니다.',
+      };
+    }
+  }
 }
