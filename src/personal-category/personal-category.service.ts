@@ -7,6 +7,7 @@ import {
   CreatePersonalCategoryInput,
   CreatePersonalCategoryOutput,
 } from './dtos/create-personal-category.dto';
+import { GetPersonalCategoriesOutput } from './dtos/get-personal-categories.dto';
 
 @Injectable()
 export class PersonalCategoryService {
@@ -15,13 +16,26 @@ export class PersonalCategoryService {
     private readonly personalCategory: Repository<PersonalCategory>,
   ) {}
 
-  // 카테고리 존재 여부 및 그룹 소속 확인 (내부용)
+  // 개인 카테고리 존재 여부 및 그룹 소속 확인 (내부용)
   async findPersonalCategoryById(
     categoryId: number,
   ): Promise<PersonalCategory | null> {
     return this.personalCategory.findOne({
       where: {
         id: categoryId,
+      },
+    });
+  }
+
+  // 개인 해당 카테고리 목록 조회
+  async findPersonalCategories(
+    userId: number,
+  ): Promise<PersonalCategory[] | null> {
+    return this.personalCategory.find({
+      where: {
+        user: {
+          id: userId,
+        },
       },
     });
   }
@@ -91,11 +105,26 @@ export class PersonalCategoryService {
   }
 
   // 개인 카테고리 목록 조회
-  async getPersonalCategories(userId: number): Promise<PersonalCategory[]> {
-    return this.personalCategory.find({
-      where: { user: { id: userId } },
-      order: { sortOrder: 'ASC' },
-    });
+  async getPersonalCategories(
+    user: User,
+  ): Promise<GetPersonalCategoriesOutput> {
+    try {
+      const personalCategories = await this.findPersonalCategories(user.id);
+      console.log('📢 [personal-category.service.ts:117]', personalCategories);
+      if (!personalCategories || personalCategories.length === 0) {
+        return {
+          ok: false,
+          error: '해당 개인 케테고리 목록이 없습니다',
+        };
+      }
+
+      return {
+        ok: true,
+        personalCategories,
+      };
+    } catch {
+      return { ok: false, error: '카테고리 목록을 조회할 수 없습니다.' };
+    }
   }
 
   // 개인 카테고리 단일 조회

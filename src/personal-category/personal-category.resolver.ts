@@ -1,13 +1,14 @@
+import { AuthUser } from '@/auth/auth-user.decorator';
+import { Role } from '@/auth/role.decorator';
 import { PersonalCategory } from '@/personal-category/entities/personal-category.entity';
 import { PersonalCategoryService } from '@/personal-category/personal-category.service';
 import { User } from '@/user/entities/user.entity';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { AuthUser } from '@/auth/auth-user.decorator';
-import { Role } from '@/auth/role.decorator';
 import {
   CreatePersonalCategoryInput,
   CreatePersonalCategoryOutput,
 } from './dtos/create-personal-category.dto';
+import { GetPersonalCategoriesOutput } from './dtos/get-personal-categories.dto';
 
 @Resolver(() => PersonalCategory)
 export class PersonalCategoryResolver {
@@ -29,9 +30,12 @@ export class PersonalCategoryResolver {
   }
 
   // 개인 카테고리 목록 조회
-  @Query(() => [PersonalCategory])
-  getPersonalCategories(@AuthUser() user: User): Promise<PersonalCategory[]> {
-    return this.personalCategoryService.getPersonalCategories(user.id);
+  @Role(['USER'])
+  @Query(() => GetPersonalCategoriesOutput)
+  async getPersonalCategories(
+    @AuthUser() authUser: User,
+  ): Promise<GetPersonalCategoriesOutput> {
+    return this.personalCategoryService.getPersonalCategories(authUser);
   }
 
   // 개인 카테고리 단일 조회
