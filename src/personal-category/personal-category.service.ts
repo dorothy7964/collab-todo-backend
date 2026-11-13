@@ -12,6 +12,10 @@ import {
   GetPersonalCategoryInput,
   GetPersonalCategoryOutput,
 } from './dtos/get-personal-category.dto';
+import {
+  UpdatePersonalCategoryInput,
+  UpdatePersonalCategoryOutput,
+} from './dtos/update-personal-category.dto';
 
 @Injectable()
 export class PersonalCategoryService {
@@ -174,18 +178,61 @@ export class PersonalCategoryService {
 
   // 개인 카테고리 수정
   async updatePersonalCategory(
-    id: number,
-    userId: number,
-    name: string,
-  ): Promise<void> {
-    await this.personalCategory.update({ id, user: { id: userId } }, { name });
+    user: User,
+    updatePersonalCategoryInput: UpdatePersonalCategoryInput,
+  ): Promise<UpdatePersonalCategoryOutput> {
+    try {
+      const { categoryId, ...updateData } = updatePersonalCategoryInput;
+      const personalCategory = await this.findPersonalCategory(
+        user.id,
+        categoryId,
+      );
+      if (!personalCategory) {
+        return {
+          ok: false,
+          error: '해당 개인 케테고리 목록이 없습니다',
+        };
+      }
+
+      // 이름을 수정하는 경우에만 중복 확인
+      if (
+        updateData.name !== undefined &&
+        updateData.name !== personalCategory.name
+      ) {
+        const isPersonalCategoryNameDuplicate =
+          await this.checkPersonalCategoryNameDuplicate(
+            updateData.name,
+            user.id,
+          );
+
+        if (isPersonalCategoryNameDuplicate) {
+          return {
+            ok: false,
+            error: '이미 존재하는 카테고리 이름입니다.',
+          };
+        }
+      }
+
+      await this.personalCategory.save([
+        {
+          id: categoryId,
+          ...updateData,
+        },
+      ]);
+
+      return {
+        ok: true,
+      };
+    } catch {
+      return { ok: false, error: '카테고리를 수정할 수 없습니다.' };
+    }
   }
 
-  // 개인 카테고리 삭제
-  async deletePersonalCategory(id: number, userId: number): Promise<void> {
-    await this.personalCategory.softDelete({
-      id,
-      user: { id: userId },
-    });
-  }
+  // // 개인 카테고리 삭제
+  // async deletePersonalCategory(id: number, userId: number): Promise<void> {
+  //   await this.personalCategory.softDelete({
+  //     id,
+  //     user: { id: userId },
+  //   });
+  // }
 }

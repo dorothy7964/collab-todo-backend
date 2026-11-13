@@ -13,6 +13,10 @@ import {
   GetPersonalCategoryInput,
   GetPersonalCategoryOutput,
 } from './dtos/get-personal-category.dto';
+import {
+  UpdatePersonalCategoryInput,
+  UpdatePersonalCategoryOutput,
+} from './dtos/update-personal-category.dto';
 
 @Resolver(() => PersonalCategory)
 export class PersonalCategoryResolver {
@@ -56,29 +60,26 @@ export class PersonalCategoryResolver {
   }
 
   // 개인 카테고리 수정
-  @Mutation(() => Boolean)
+  @Role(['USER'])
+  @Mutation(() => UpdatePersonalCategoryOutput)
   async updatePersonalCategory(
-    @AuthUser() user: User,
-    @Args('id') id: number,
-    @Args('name') name: string,
-  ): Promise<boolean> {
-    await this.personalCategoryService.updatePersonalCategory(
-      id,
-      user.id,
-      name,
+    @AuthUser() authUser: User,
+    @Args('input') updatePersonalCategoryInput: UpdatePersonalCategoryInput,
+  ): Promise<UpdatePersonalCategoryOutput> {
+    return this.personalCategoryService.updatePersonalCategory(
+      authUser,
+      updatePersonalCategoryInput,
     );
-
-    return true;
   }
 
   // 개인 카테고리 삭제
-  @Mutation(() => Boolean)
-  async deletePersonalCategory(
-    @AuthUser() user: User,
-    @Args('id') id: number,
-  ): Promise<boolean> {
-    await this.personalCategoryService.deletePersonalCategory(id, user.id);
+  // @Mutation(() => Boolean)
+  // async deletePersonalCategory(
+  //   @AuthUser() user: User,
+  //   @Args('id') id: number,
+  // ): Promise<boolean> {
+  //   await this.personalCategoryService.deletePersonalCategory(id, user.id);
 
-    return true;
-  }
+  //   return true;
+  // }
 }
